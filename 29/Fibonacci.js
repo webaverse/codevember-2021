@@ -37,4 +37,13 @@ function pointsOnPlane(n) {
   return pts;
 }
 
-export { pointsOnSphere, pointsOnPlane };
+function uvsOnPlane(n) {
+  const uvs = [];
+  for (var k = 0; k < n; k++) {
+    const uv = new THREE.Vector2(Math.random(), 0, Math.random());
+    uvs.push(uv);
+  }
+  return uvs;
+}
+
+export { pointsOnSphere, pointsOnPlane, uvsOnPlane };
