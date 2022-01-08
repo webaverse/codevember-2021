@@ -164,7 +164,7 @@ function distributeGrass() {
     scene.remove(mesh);
     mesh = null;
   }
-  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.015, 1, 2, 10));
+  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.01, 1, 2, 10));
   const trans = new Matrix4().makeTranslation(0, -0.5, 0);
   geometry.applyMatrix4(trans);
   const rot = new Matrix4().makeRotationX(-Math.PI / 2);
@@ -176,8 +176,8 @@ function distributeGrass() {
       // vertices[i + 1] = 0.005;
     }
   }
-  const offsetData = new Float32Array(geometry.attributes.position.count * 3);
-  geometry.setAttribute('offset', new InstancedBufferAttribute(offsetData, 3));
+  // const offsetData = new Float32Array(geometry.attributes.position.count * 3);
+  // geometry.setAttribute('offset', new InstancedBufferAttribute(offsetData, 3));
   mesh = new InstancedMesh(geometry, material, points.length);
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
@@ -201,13 +201,12 @@ function distributeGrass() {
 
   const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
     .normalize()
-    .multiplyScalar(size * Math.sqrt(2));
+    .multiplyScalar(size / 2 * Math.sqrt(2));
   // console.log('main offset', mainOffset.toArray());
   // const mainOffset = localVector3.set(-500, 0, -500);
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
     const mainP = localVector4.copy(p);
-    p.toArray(positionData, i * 3);
     
     t.copy(p);
     // distort(t);
@@ -238,6 +237,10 @@ function distributeGrass() {
     // dummy.position.sub(mainP);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
+
+    p.multiplyScalar(0.5);
+    // distort(p);
+    p.toArray(positionData, i * 3);
 
     // mainP.set(100, 100, 100).toArray(offsetData, i * 3);
 
