@@ -185,7 +185,7 @@ function distributeGrass() {
 
   const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
     .normalize()
-    .multiplyScalar(Math.random() * size * 2 * Math.sqrt(2));
+    .multiplyScalar(size * Math.sqrt(2));
   // console.log('main offset', mainOffset.toArray());
   // const mainOffset = localVector3.set(-500, 0, -500);
   for (let i = 0; i < points.length; i++) {
