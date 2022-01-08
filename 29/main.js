@@ -231,7 +231,7 @@ function distributeGrass() {
     ).normalize(); */
     t.copy(p).add(n);
     // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
-    dummy.up.set(0, 0, -1);
+    dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
     // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
