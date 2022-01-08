@@ -21,6 +21,7 @@ in vec3 instanceColor;
 // in vec3 offset;
 
 uniform float scale;
+uniform vec3 cameraTarget;
 uniform vec3 direction;
 uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
@@ -38,6 +39,8 @@ out float vDry;
 out float vLight;
 
 #define PI 3.1415926535897932384626433832795
+// const float pos_infinity = uintBitsToFloat(0x7F800000);
+// const float neg_infinity = uintBitsToFloat(0xFF800000);
 
 float inCubic(in float t) {
   return t * t * t;
@@ -66,6 +69,13 @@ mat4 rotationMatrix(vec3 axis, float angle) {
 vec3 rotateVectorAxisAngle(vec3 v, vec3 axis, float angle) {
   mat4 m = rotationMatrix(axis, angle);
   return (m * vec4(v, 1.0)).xyz;
+}
+
+// this function applies modulo to a vector to keep it within a min/max range
+vec3 modXZ(vec3 minBound, vec3 maxBound, vec3 p) {
+  vec2 size = maxBound.xz - minBound.xz;
+  vec2 res = mod(p.xz - minBound.xz, size) + minBound.xz;
+  return vec3(res.x, p.y, res.y);
 }
 
 void main() {
@@ -105,15 +115,24 @@ void main() {
 
   p = (instanceMatrix * vec4(p, 1.0)).xyz;
 
-  // if (offset.x != 0.) {
-    p += offset;
+  const float offsetRange = 2.;
+  vec3 ct = cameraTarget/scale;
+  offset = modXZ(
+    vec3(ct.x - offsetRange, 0., ct.z - offsetRange),
+    vec3(ct.x + offsetRange, 0., ct.z + offsetRange),
+    offset
+  );
 
-    p *= scale;
-    vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-    gl_Position = projectionMatrix * mvPosition;;
-  /* } else {
-    gl_Position = vec4(0.);
-  } */
+  /* vec3 minOffset = vec3(-10., 0, 10.) - cameraTarget*scale;
+  vec3 maxOffset = vec3(10., 0, 10.) - cameraTarget*scale;
+  vec3 offsetSize = maxOffset - minOffset;
+  offset = mod((offset - minOffset) / offsetSize, 1.) * offsetSize + minOffset; */
+  
+  p += offset;
+  p *= scale;
+  
+  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mvPosition;;
 }`;
 
 const fragmentShader = `precision highp float;
@@ -155,6 +174,7 @@ class GrassMaterial extends RawShaderMaterial {
         time: { value: 0 },
         persistence: { value: 1 },
         blade: { value: blade },
+        cameraTarget: { value: new Vector3() },
         direction: { value: new Vector3() },
       },
       side: DoubleSide,

@@ -2,6 +2,7 @@ import {
   scene,
   controls,
   renderer,
+  addUpdate,
   addResize,
   resize,
   camera,
@@ -137,6 +138,11 @@ function calcNormal(p, fn, n) {
 let mesh;
 let numPoints = 100000;
 // let numPoints = 300000;
+
+/* let updateFn = null;
+addUpdate(() => {
+  updateFn && updateFn();
+}); */
 
 function distributeGrass() {
   const distort = generateDistortFn();
@@ -280,6 +286,10 @@ function distributeGrass() {
 
   curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
   curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
+
+  /* updateFn = () => {
+    controls.
+  }; */
 }
 
 distributeGrass();
@@ -394,6 +404,9 @@ function render() {
     material.uniforms.direction.value.y = 0;
     material.uniforms.direction.value.normalize();
   }
+
+  material.uniforms.cameraTarget.value.copy(controls.target);
+  // console.log('target', material.uniforms.cameraTarget.value.toArray().join(', '));
 
   post.render(scene, camera);
   // renderer.render(scene, camera);
