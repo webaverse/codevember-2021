@@ -115,7 +115,7 @@ function calcNormal(p, fn, n) {
     // n.z *= -1;
     // n.multiplyScalar(-1);
   }
-  n.lerp(up, 0.5);
+  n.lerp(up, 0.3);
 }
 
 let mesh;
