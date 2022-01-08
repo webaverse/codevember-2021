@@ -3,7 +3,7 @@ import {
   Vector2,
   GLSL3,
   RGBAFormat,
-} from "../third_party/three.module.js";
+} from 'three';
 import { ShaderPingPongPass } from "./ShaderPingPongPass.js";
 import { shader as orthoVs } from "../shaders/ortho.js";
 import { shader as blurFs } from "../shaders/blur.js";

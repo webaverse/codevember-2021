@@ -6,7 +6,7 @@ import {
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
-} from "../third_party/three.module.js";
+} from 'three';
 import { OrbitControls } from "../third_party/OrbitControls.js";
 
 const renderer = new WebGLRenderer({

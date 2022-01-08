@@ -6,7 +6,7 @@ import {
   RGBAFormat,
   GLSL3,
   NearestFilter,
-} from "../third_party/three.module.js";
+} from 'three';
 import { shader as curl } from "../shaders/curl.js";
 import { shader as noise3d } from "../shaders/noise3d.js";
 

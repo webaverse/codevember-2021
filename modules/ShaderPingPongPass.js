@@ -3,7 +3,7 @@ import {
   Scene,
   Mesh,
   PlaneBufferGeometry,
-} from "../third_party/three.module.js";
+} from 'three';
 import { getFBO } from "./fbo.js";
 
 class ShaderPingPongPass {

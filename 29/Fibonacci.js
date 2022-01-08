@@ -1,4 +1,5 @@
-import { Vector3 } from "../third_party/three.module.js";
+import * as THREE from 'three';
+import { Vector3 } from 'three';
 
 function pointsOnSphere(n) {
   const pts = [];

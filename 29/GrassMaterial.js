@@ -5,8 +5,8 @@ import {
   DoubleSide,
   Vector2,
   Vector3,
-} from "../third_party/three.module.js";
-import { ShaderPass } from "../modules/ShaderPass.js";
+} from 'three';
+// import { ShaderPass } from "../modules/ShaderPass.js";
 
 const loader = new TextureLoader();
 const blade = loader.load("../assets/blade.jpg");

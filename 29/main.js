@@ -26,11 +26,12 @@ import {
   Raycaster,
   CanvasTexture,
   EdgesHelper,
-} from "../third_party/three.module.js";
-import { Poisson3D } from "./poisson.js";
+} from 'three';
+import * as THREE from 'three';
+// import { Poisson3D } from "./poisson.js";
 import { GrassMaterial } from "./GrassMaterial.js";
 import { nextPowerOfTwo, randomInRange, VERSION } from "../modules/Maf.js";
-import { pointsOnSphere } from "./Fibonacci.js";
+import { pointsOnPlane } from "./Fibonacci.js";
 import { perlin3 } from "../third_party/perlin.js";
 import { CurlPass } from "./CurlPass.js";
 import { Post } from "./post.js";

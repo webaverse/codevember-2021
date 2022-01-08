@@ -14,7 +14,7 @@ import {
   DataTexture3D,
   RedFormat,
   FloatType,
-} from "../third_party/three.module.js";
+} from 'three';
 import { getFBO } from "../modules/fbo.js";
 import { shader as orthoVertexShader } from "../shaders/ortho.js";
 import { ShaderPass } from "../modules/ShaderPass.js";

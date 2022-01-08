@@ -10,7 +10,7 @@ import {
   BufferAttribute,
   Mesh,
   OrthographicCamera,
-} from "../third_party/three.module.js";
+} from 'three';
 
 class ShaderTexture {
   constructor(

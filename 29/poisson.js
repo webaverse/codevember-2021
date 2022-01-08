@@ -1,5 +1,5 @@
 import { randomInRange } from "../modules/Maf.js";
-import { Vector3 } from "../third_party/three.module.js";
+import { Vector3 } from 'three';
 
 class Poisson3D {
   constructor(width = 512, height = 512, depth = 512, r = 4, k = 30) {
