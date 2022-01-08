@@ -250,13 +250,13 @@ document.querySelector("#high").addEventListener("click", (e) => {
   setQuality(300000);
 });
 
-document.querySelector("#pauseBtn").addEventListener("click", (e) => {
+/* document.querySelector("#pauseBtn").addEventListener("click", (e) => {
   running = !running;
 });
 
 document.querySelector("#randomizeBtn").addEventListener("click", (e) => {
   randomize();
-});
+}); */
 
 const raycaster = new Raycaster();
 const mouse = new Vector2();
