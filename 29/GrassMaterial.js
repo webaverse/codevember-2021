@@ -121,7 +121,7 @@ void main() {
   vec3 color4 = vec3(216., 255., 147.)/ 255.;
 
   vec3 color = mix(mix(color1, color2, vUv.y), color3, vDry);
-  color = mix(color, color4, vLight);
+  color = mix(color, color4, 0.3 + vLight*0.7);
   fragColor = vec4(color * vUv.y, 1.);
 }`;
 
