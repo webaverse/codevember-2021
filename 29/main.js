@@ -54,8 +54,9 @@ const sphere = new Mesh(
 );
 // scene.add(sphere);
 
+const scale = 5;
 const plane = new Mesh(
-  new PlaneBufferGeometry(size, size, 1, 1)
+  new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
     .applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)),
   new MeshBasicMaterial({ color: 0x333333, side: DoubleSide }),
 );
@@ -88,7 +89,7 @@ function calcNormal(p, fn, n) {
   //const dPos = p.clone();
   // fn(dPos);
 
-  const tangent = new Vector3().crossVectors(normal, Math.random() < 0.5 ? up : down);
+  const tangent = new Vector3().crossVectors(normal, up);
   // fn(tangent)
   const binormal = new Vector3().crossVectors(normal, tangent);
   // fn(binormal);
@@ -109,12 +110,12 @@ function calcNormal(p, fn, n) {
   /* n.x *= 0.3;
   n.z *= 0.3;
   n.normalize(); */
-  if (n.y < 0) {
-    n.y = Math.abs(n.y);
+  // if (n.y < 0) {
+    // n.y = Math.abs(n.y);
     // n.x *= -1;
     // n.z *= -1;
     // n.multiplyScalar(-1);
-  }
+  // }
   n.lerp(up, 0.3);
 }
 
@@ -215,8 +216,9 @@ function distributeGrass() {
     ).normalize(); */
     t.copy(p).add(n);
     // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
+    dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
-    dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
+    // dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
     // dummy.position.sub(mainP);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
@@ -340,9 +342,9 @@ function render() {
   const intersects = raycaster.intersectObject(plane);
 
   if (intersects.length) {
-    point.copy(intersects[0].point);
-    const n = intersects[0].point.clone();
-    boulder.position.copy(point).add(n.multiplyScalar(0.05));
+    point.copy(intersects[0].point)
+      .divideScalar(scale);
+    boulder.position.copy(point);
   }
 
   if (running) {
@@ -356,8 +358,23 @@ function render() {
 
   material.uniforms.boulder.value.copy(boulder.position);
   material.uniforms.time.value = time / 10;
+  material.uniforms.scale.value = scale;
+
+  material.uniforms.direction.value.set(0, 0, -1)
+    // .add(camera.up)
+    .normalize()
+    .applyQuaternion(camera.quaternion);
+  material.uniforms.direction.value.y = 0;
+  if (material.uniforms.direction.value.lengthSq() === 0) {
+    material.uniforms.direction.value.copy(camera.up)
+      .applyQuaternion(camera.quaternion);
+    material.uniforms.direction.value.y = 0;
+  }
+  material.uniforms.direction.value.normalize();
+
   post.render(scene, camera);
   // renderer.render(scene, camera);
+  
 
   // frames++;
   // if (frames > 240) {

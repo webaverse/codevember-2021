@@ -18,8 +18,10 @@ in vec3 normal;
 in vec2 uv;
 in mat4 instanceMatrix;
 in vec3 instanceColor;
-in vec3 offset;
+// in vec3 offset;
 
+uniform float scale;
+uniform vec3 direction;
 uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -34,6 +36,8 @@ out vec3 vNormal;
 out vec2 vUv;
 out float vDry;
 out float vLight;
+
+#define PI 3.1415926535897932384626433832795
 
 float inCubic(in float t) {
   return t * t * t;
@@ -89,15 +93,19 @@ void main() {
   // pNormal = normalize(pNormal);
   vec3 target = normalize(position + pNormal ) * h;
   vNormal = normalMatrix * normal;
-  vec3 p;
+  vec3 p = position;
+  p = rotateVectorAxisAngle(p, vec3(0, 0, 1.), PI/2.+ atan(direction.z, direction.x));
   float f = inCubic(position.z);
-  p = mix(position, target, f);
+  p = mix(p, target, f);
   // p = mix(p, p - dBoulder * l, f);
   // p *= length(dBoulder);
 
   vDry = c.a;
+
+  p = (instanceMatrix * vec4(p, 1.0)).xyz;
+  p *= scale;
   
-  vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
+  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mvPosition;;
 }`;
 
@@ -134,11 +142,13 @@ class GrassMaterial extends RawShaderMaterial {
       glslVersion: GLSL3,
       ...options,
       uniforms: {
+        scale: { value: 1 },
         curlMap: { value: null },
         boulder: { value: new Vector3() },
         time: { value: 0 },
         persistence: { value: 1 },
         blade: { value: blade },
+        direction: { value: new Vector3() },
       },
       side: DoubleSide,
       transparent: true,
