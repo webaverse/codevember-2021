@@ -115,7 +115,7 @@ function calcNormal(p, fn, n) {
     // n.z *= -1;
     // n.multiplyScalar(-1);
   }
-  n.lerp(up, 0.2);
+  n.lerp(up, 0.5);
 }
 
 let mesh;
@@ -183,7 +183,9 @@ function distributeGrass() {
   const positionData = new Float32Array(width * height * 3);
   const rotation = 0; // randomInRange(0, 1);
 
-  const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100);
+  const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
+    .normalize()
+    .multiplyScalar(Math.random() * size * 2 * Math.sqrt(2));
   // console.log('main offset', mainOffset.toArray());
   // const mainOffset = localVector3.set(-500, 0, -500);
   for (let i = 0; i < points.length; i++) {
