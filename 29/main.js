@@ -22,12 +22,15 @@ import {
   RGBFormat,
   FloatType,
   ClampToEdgeWrapping,
+  RepeatWrapping,
   NearestFilter,
   DoubleSide,
   Raycaster,
   InstancedBufferAttribute,
   CanvasTexture,
   EdgesHelper,
+  MeshStandardMaterial,
+  TextureLoader,
 } from 'three';
 import * as THREE from 'three';
 // import { Poisson3D } from "./poisson.js";
@@ -55,11 +58,23 @@ const sphere = new Mesh(
 // scene.add(sphere);
 
 const scale = 5;
+const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
     .applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)),
-  new MeshBasicMaterial({ color: 0x333333, side: DoubleSide }),
+  new MeshStandardMaterial({
+    emissive: new THREE.Color(75./255, 112./255, 34./255).multiplyScalar(0.35).getHex(),
+    // emissive: 0xffffff,
+    // emissiveMap: textureLoader.load('/codevember-2021/29/Vol_39_5_Base_Color.png'),
+    side: DoubleSide,
+  }),
 );
+// plane.material.emissiveMap.wrapS = RepeatWrapping;
+// plane.material.emissiveMap.wrapT = RepeatWrapping;
+for (let i = 0; i < plane.geometry.attributes.uv.count; i++) {
+  plane.geometry.attributes.uv.array[i * 2 + 0] *= 20;
+  plane.geometry.attributes.uv.array[i * 2 + 1] *= 20;
+}
 scene.add(plane);
 
 function generateDistortFn() {
@@ -116,7 +131,7 @@ function calcNormal(p, fn, n) {
     // n.z *= -1;
     // n.multiplyScalar(-1);
   // }
-  n.lerp(up, 0.3);
+  // n.lerp(up, 0.3);
 }
 
 let mesh;
@@ -182,7 +197,7 @@ function distributeGrass() {
   const height = Math.ceil(points.length / width);
 
   const positionData = new Float32Array(width * height * 3);
-  const rotation = 0; // randomInRange(0, 1);
+  const rotation = 0.3; // randomInRange(0, 1);
 
   const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
     .normalize()
@@ -195,7 +210,7 @@ function distributeGrass() {
     p.toArray(positionData, i * 3);
     
     t.copy(p);
-    // distort(p);
+    // distort(t);
     // t.add(mainOffset);
     dummy.position.copy(p);
     dummy.scale.set(1, 1, 0.1);
@@ -218,7 +233,7 @@ function distributeGrass() {
     // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
     dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
-    // dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
+    dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
     // dummy.position.sub(mainP);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
@@ -321,7 +336,7 @@ const boulder = new Mesh(
   new IcosahedronBufferGeometry(0.1, 10),
   new MeshBasicMaterial({ color: 0 })
 );
-scene.add(boulder);
+// scene.add(boulder);
 
 let frames = 0;
 
@@ -365,12 +380,13 @@ function render() {
     .normalize()
     .applyQuaternion(camera.quaternion);
   material.uniforms.direction.value.y = 0;
-  if (material.uniforms.direction.value.lengthSq() === 0) {
+  material.uniforms.direction.value.normalize();
+  if (material.uniforms.direction.value.length() < 0.01) {
     material.uniforms.direction.value.copy(camera.up)
       .applyQuaternion(camera.quaternion);
     material.uniforms.direction.value.y = 0;
+    material.uniforms.direction.value.normalize();
   }
-  material.uniforms.direction.value.normalize();
 
   post.render(scene, camera);
   // renderer.render(scene, camera);
