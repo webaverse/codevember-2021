@@ -118,7 +118,8 @@ function calcNormal(p, fn, n) {
 }
 
 let mesh;
-let numPoints = 100000;
+// let numPoints = 100000;
+let numPoints = 300000;
 
 function distributeGrass() {
   const distort = generateDistortFn();
