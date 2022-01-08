@@ -75,10 +75,10 @@ void main() {
     dBoulder = vec3(0.);
   }
 
-  vec2 size = vec2(textureSize(curlMap, 0));
+  vec2 tSize = vec2(textureSize(curlMap, 0));
   float id = float(int(instanceColor.x));
   vec2 curlUv = instanceColor.yz;
-  curlUv = vec2(mod(id, size.x)/(size.x), (id/size.x)/(size.y));
+  curlUv = vec2(mod(id, tSize.x)/(tSize.x), (id/tSize.x)/(tSize.y));
   vec4 c = texture(curlMap, curlUv);
   vec3 n = c.xyz;
   float h = (1.+ c.a);
