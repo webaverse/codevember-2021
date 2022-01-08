@@ -28,4 +28,13 @@ function pointsOnSphere(n) {
   return pts;
 }
 
-export { pointsOnSphere };
+function pointsOnPlane(n) {
+  const pts = [];
+  for (var k = 0; k < n; k++) {
+    const pt = new THREE.Vector3(Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
+    pts.push(pt);
+  }
+  return pts;
+}
+
+export { pointsOnSphere, pointsOnPlane };
