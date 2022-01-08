@@ -202,7 +202,7 @@ function distributeGrass() {
   const width = nextPowerOfTwo(Math.sqrt(points.length));
   const height = Math.ceil(points.length / width);
 
-  const positionData = new Float32Array(width * height * 3);
+  const curlData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
 
   const mainOffset = localVector3.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
@@ -249,7 +249,7 @@ function distributeGrass() {
 
     // p.multiplyScalar(0.5);
     // distort(p);
-    p.toArray(positionData, i * 3);
+    p.toArray(curlData, i * 3);
 
     // mainP.set(100, 100, 100).toArray(offsetData, i * 3);
 
@@ -265,7 +265,7 @@ function distributeGrass() {
   curlPass = new CurlPass(
     renderer,
     new DataTexture(
-      positionData,
+      curlData,
       width,
       height,
       RGBFormat,
