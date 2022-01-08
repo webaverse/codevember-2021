@@ -197,7 +197,7 @@ function distributeGrass() {
   const height = Math.ceil(points.length / width);
 
   const positionData = new Float32Array(width * height * 3);
-  const rotation = 0.3; // randomInRange(0, 1);
+  const rotation = 0.5; // randomInRange(0, 1);
 
   const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
     .normalize()
@@ -233,6 +233,7 @@ function distributeGrass() {
     // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
     dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
+    // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
     // dummy.position.sub(mainP);
     dummy.updateMatrix();
