@@ -59,7 +59,7 @@ const sphere = new Mesh(
 // scene.add(sphere);
 
 const scale = 5;
-const textureLoader = new TextureLoader();
+// const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
     .applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)),
@@ -406,7 +406,8 @@ function render() {
   }
 
   material.uniforms.cameraTarget.value.copy(controls.target);
-  // console.log('target', material.uniforms.cameraTarget.value.toArray().join(', '));
+  plane.position.set(controls.target.x, 0, controls.target.z);
+  plane.updateMatrixWorld();
 
   post.render(scene, camera);
   // renderer.render(scene, camera);
