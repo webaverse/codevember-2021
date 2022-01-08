@@ -18,6 +18,7 @@ in vec3 normal;
 in vec2 uv;
 in mat4 instanceMatrix;
 in vec3 instanceColor;
+in vec3 offset;
 
 uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;

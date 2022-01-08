@@ -10,6 +10,7 @@ import {
   MeshNormalMaterial,
   Object3D,
   InstancedMesh,
+  InstancedBufferGeometry,
   PlaneBufferGeometry,
   Vector3,
   Vector2,
@@ -24,6 +25,7 @@ import {
   NearestFilter,
   DoubleSide,
   Raycaster,
+  InstancedBufferAttribute,
   CanvasTexture,
   EdgesHelper,
 } from 'three';
@@ -41,20 +43,7 @@ const post = new Post(renderer);
 
 // blade geometry
 
-const geometry = new PlaneBufferGeometry(0.01, 1, 2, 10);
-const trans = new Matrix4().makeTranslation(0, -0.5, 0);
-geometry.applyMatrix4(trans);
-const rot = new Matrix4().makeRotationX(-Math.PI / 2);
-geometry.applyMatrix4(rot);
 const material = new GrassMaterial({ wireframe: !true });
-
-const vertices = geometry.attributes.position.array;
-for (let i = 0; i < vertices.length; i += 3) {
-  if (vertices[i + 0] === 0) {
-    const z = vertices[i + 2];
-    vertices[i + 1] = 0.005;
-  }
-}
 
 // opaque interior
 
@@ -92,17 +81,17 @@ function orthogonal(v) {
 }
 
 const up = new Vector3(0, 1, 0);
+const down = new Vector3(0, -1, 0);
 
 function calcNormal(p, fn, n) {
   const normal = p.normalize();
-  const dPos = p.clone();
-  fn(dPos);
+  //const dPos = p.clone();
+  // fn(dPos);
 
-  const tangent =
-    Math.abs(normal.dot(up)) > 0.5
-      ? orthogonal(normal)
-      : new Vector3().crossVectors(normal, up);
+  const tangent = new Vector3().crossVectors(normal, Math.random() < 0.5 ? up : down);
+  // fn(tangent)
   const binormal = new Vector3().crossVectors(normal, tangent);
+  // fn(binormal);
 
   const offset = 1;
   const a = new Vector3().copy(p).add(tangent.clone().multiplyScalar(offset));
@@ -113,8 +102,20 @@ function calcNormal(p, fn, n) {
 
   const dT = a.sub(p);
   const dB = b.sub(p);
+  // dT.crossVectors(dT, dB);
 
   n.crossVectors(dT, dB).normalize();
+  // fn(n);
+  /* n.x *= 0.3;
+  n.z *= 0.3;
+  n.normalize(); */
+  if (n.y < 0) {
+    n.y = Math.abs(n.y);
+    // n.x *= -1;
+    // n.z *= -1;
+    // n.multiplyScalar(-1);
+  }
+  n.lerp(up, 0.2);
 }
 
 let mesh;
@@ -147,6 +148,20 @@ function distributeGrass() {
     scene.remove(mesh);
     mesh = null;
   }
+  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.01, 1, 2, 10));
+  const trans = new Matrix4().makeTranslation(0, -0.5, 0);
+  geometry.applyMatrix4(trans);
+  const rot = new Matrix4().makeRotationX(-Math.PI / 2);
+  geometry.applyMatrix4(rot);
+  const vertices = geometry.attributes.position.array;
+  for (let i = 0; i < vertices.length; i += 3) {
+    if (vertices[i + 0] === 0) {
+      // const z = vertices[i + 2];
+      // vertices[i + 1] = 0.005;
+    }
+  }
+  const offsetData = new Float32Array(geometry.attributes.position.count * 3);
+  geometry.setAttribute('offset', new InstancedBufferAttribute(offsetData, 3));
   mesh = new InstancedMesh(geometry, material, points.length);
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
@@ -155,6 +170,10 @@ function distributeGrass() {
   const n = new Vector3();
   const n2 = new Vector3();
   const dummy = new Object3D();
+  const localVector = new Vector3();
+  const localVector2 = new Vector3();
+  const localVector3 = new Vector3();
+  const localVector4 = new Vector3();
 
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
@@ -162,24 +181,45 @@ function distributeGrass() {
   const height = Math.ceil(points.length / width);
 
   const positionData = new Float32Array(width * height * 3);
-  const rotation = 0.5; // randomInRange(0.1, 1);
+  const rotation = 0; // randomInRange(0, 1);
 
+  const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100);
+  // console.log('main offset', mainOffset.toArray());
+  // const mainOffset = localVector3.set(-500, 0, -500);
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
+    const mainP = localVector4.copy(p);
     p.toArray(positionData, i * 3);
     
     t.copy(p);
-    distort(p);
+    // distort(p);
+    // t.add(mainOffset);
     dummy.position.copy(p);
     dummy.scale.set(1, 1, 0.1);
+    // t.multiplyScalar(0.1);
+    t.add(mainOffset);
     calcNormal(t, distort, n);
-    // n.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
-    n.lerp(n2.set(0, 1, 0), 0.25 + Math.random() * 0.25);
+    // n.y += perlin3(100, (n.y * 2 - 1) * 100, 100) * 0.5;
+    // n.normalize();
+    // n.x *= Math.random() < 0.5 ? 1 : -1;
+    // n.y *= Math.random() < 0.5 ? 1 : -1;
+    // n.z *= Math.random() < 0.5 ? 1 : -1;
+    /* n.add(
+      localVector2.set(
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+      ).normalize().multiplyScalar(0.3)
+    ).normalize(); */
     t.copy(p).add(n);
+    // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
     dummy.lookAt(t);
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
+    // dummy.position.sub(mainP);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
+
+    // mainP.set(100, 100, 100).toArray(offsetData, i * 3);
 
     mesh.setColorAt(
       i,
@@ -212,8 +252,8 @@ function distributeGrass() {
     material.uniforms.curlMap.value = curlPass.texture;
   // }
 
-  curlPass.shader.uniforms.persistence.value = randomInRange(1, 1.5);
-  curlPass.shader.uniforms.speed.value = randomInRange(0.5, 1.5);
+  curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
+  curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
 }
 
 distributeGrass();
