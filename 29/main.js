@@ -238,7 +238,7 @@ function distributeGrass() {
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
 
-    p.multiplyScalar(0.5);
+    // p.multiplyScalar(0.5);
     // distort(p);
     p.toArray(positionData, i * 3);
 
