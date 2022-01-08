@@ -262,27 +262,24 @@ function distributeGrass() {
   mesh.instanceMatrix.needsUpdate = true;
   mesh.instanceColor.needsUpdate = true;
 
-  // if (curlPass) {
-    curlPass = new CurlPass(
-      renderer,
-      new DataTexture(
-        positionData,
-        width,
-        height,
-        RGBFormat,
-        FloatType,
-        undefined,
-        ClampToEdgeWrapping,
-        ClampToEdgeWrapping,
-        NearestFilter,
-        NearestFilter
-      ),
+  curlPass = new CurlPass(
+    renderer,
+    new DataTexture(
+      positionData,
       width,
-      height
-    );
-
-    material.uniforms.curlMap.value = curlPass.texture;
-  // }
+      height,
+      RGBFormat,
+      FloatType,
+      undefined,
+      ClampToEdgeWrapping,
+      ClampToEdgeWrapping,
+      NearestFilter,
+      NearestFilter
+    ),
+    width,
+    height
+  );
+  material.uniforms.curlMap.value = curlPass.texture;
 
   curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
   curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
