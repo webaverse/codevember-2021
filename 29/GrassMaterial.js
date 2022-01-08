@@ -88,15 +88,15 @@ void main() {
   // pNormal = normalize(pNormal);
   vec3 target = normalize(position + pNormal ) * h;
   vNormal = normalMatrix * normal;
-  vec3 offset;
+  vec3 p;
   float f = inCubic(position.z);
-  offset = mix(position, target, f);
-  // offset = mix(offset, offset - dBoulder * l, f);
-  // offset *= length(dBoulder);
+  p = mix(position, target, f);
+  // p = mix(p, p - dBoulder * l, f);
+  // p *= length(dBoulder);
 
   vDry = c.a;
   
- vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(offset, 1.0);
+  vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mvPosition;;
 }`;
 
