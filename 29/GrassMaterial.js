@@ -61,23 +61,21 @@ void main() {
   vec4 c = texture(curlMap, curlUv);
   vec3 n = c.xyz;
   float h = (1.+ c.a);
-  if(length(dBoulder) > 0.) {
-    float l = length(dBoulder)/cover;
-    // n.xy *= l*10.;
-    h *= l;
-  } 
-  vec3 pNormal =(transpose(inverse(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
+  float l = length(dBoulder) > 0. ? (length(dBoulder)/cover) : 0.;
+  vec3 pNormal = (transpose(inverse(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
+  // pNormal.xz -= dBoulder.xz;
+  // pNormal = normalize(pNormal);
   vec3 target = normalize(position + pNormal ) * h;
   vNormal = normalMatrix * normal;
   vec3 offset;
-  float f = inCubic(position.z);//pow(position.z, 4.);
+  float f = inCubic(position.z);
   offset = mix(position, target, f);
+  // offset = mix(offset, offset - dBoulder * l, f);
   // offset *= length(dBoulder);
 
   vDry = c.a;
   
  vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(offset, 1.0);
-  // vec4 mvPosition = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
   gl_Position = projectionMatrix * mvPosition;;
 }`;
 

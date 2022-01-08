@@ -58,16 +58,24 @@ for (let i = 0; i < vertices.length; i += 3) {
 
 // opaque interior
 
+const size = 4;
 const sphere = new Mesh(
   new IcosahedronBufferGeometry(1, 10),
   new MeshBasicMaterial({ color: 0, side: DoubleSide })
 );
-scene.add(sphere);
+// scene.add(sphere);
+
+const plane = new Mesh(
+  new PlaneBufferGeometry(size, size, 1, 1)
+    .applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)),
+  new MeshBasicMaterial({ color: 0x333333, side: DoubleSide }),
+);
+scene.add(plane);
 
 function generateDistortFn() {
-  const a = randomInRange(-100, 100);
-  const b = randomInRange(-100, 100);
-  const c = randomInRange(-100, 100);
+  const a = randomInRange(-1000, 1000);
+  const b = randomInRange(-1000, 1000);
+  const c = randomInRange(-1000, 1000);
   const radius = randomInRange(0.5, 1);
   return (p) => {
     p.multiplyScalar(1 + radius * perlin3(p.x + a, p.y + b, p.z + c));
@@ -116,21 +124,24 @@ let numPoints = 100000;
 function distributeGrass() {
   const distort = generateDistortFn();
 
-  const tmp = new Vector3();
+  /* const tmp = new Vector3();
   const sphereVertices = sphere.geometry.attributes.position.array;
   for (let i = 0; i < sphereVertices.length; i += 3) {
     tmp.set(sphereVertices[i], sphereVertices[i + 1], sphereVertices[i + 2]);
     tmp.normalize();
-    distort(tmp);
+    // distort(tmp);
     sphereVertices[i] = tmp.x;
     sphereVertices[i + 1] = tmp.y;
     sphereVertices[i + 2] = tmp.z;
   }
-  sphere.geometry.attributes.position.needsUpdate = true;
+  sphere.geometry.attributes.position.needsUpdate = true; */
 
   // const poisson = new Poisson3D(1, 1, 1, 0.01, 30);
   // const points = poisson.calculate();
-  const points = pointsOnSphere(numPoints);
+  const points = pointsOnPlane(numPoints);
+  for (const pt of points) {
+    pt.multiplyScalar(size/2);
+  }
 
   if (!mesh) {
     mesh = new InstancedMesh(geometry, material, points.length);
@@ -140,6 +151,7 @@ function distributeGrass() {
 
   const t = new Vector3();
   const n = new Vector3();
+  const n2 = new Vector3();
 
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
@@ -147,23 +159,24 @@ function distributeGrass() {
   const height = Math.ceil(points.length / width);
 
   const positionData = new Float32Array(width * height * 3);
-  const rotation = randomInRange(0.1, 2);
+  const rotation = 0.5; // randomInRange(0.1, 1);
 
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
+    p.toArray(positionData, i * 3);
+    
     t.copy(p);
-    distort(p);
+    // distort(p);
     dummy.position.copy(p);
     dummy.scale.set(1, 1, 0.1);
     calcNormal(t, distort, n);
+    // n.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
+    n.lerp(n2.set(0, 1, 0), 0.5 + Math.random() * 0.25);
     t.copy(p).add(n);
     dummy.lookAt(t);
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
-    positionData[i * 3] = p.x;
-    positionData[i * 3 + 1] = p.y;
-    positionData[i * 3 + 2] = p.z;
 
     mesh.setColorAt(
       i,
@@ -279,7 +292,7 @@ function render() {
   // mouse.x = 0.5 * Math.cos(time);
   // mouse.y = 0.5 * Math.sin(0.9 * time);
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObject(sphere);
+  const intersects = raycaster.intersectObject(plane);
 
   if (intersects.length) {
     point.copy(intersects[0].point);
