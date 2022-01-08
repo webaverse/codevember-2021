@@ -78,7 +78,7 @@ function generateDistortFn() {
   const c = randomInRange(-1000, 1000);
   const radius = randomInRange(0.5, 1);
   return (p) => {
-    p.multiplyScalar(1 + radius * perlin3(p.x + a, p.y + b, p.z + c));
+    p.multiplyScalar(2 + radius * perlin3(p.x + a, p.y + b, p.z + c));
   };
 }
 
@@ -117,7 +117,6 @@ function calcNormal(p, fn, n) {
   n.crossVectors(dT, dB).normalize();
 }
 
-const dummy = new Object3D();
 let mesh;
 let numPoints = 100000;
 
@@ -143,15 +142,18 @@ function distributeGrass() {
     pt.multiplyScalar(size/2);
   }
 
-  if (!mesh) {
-    mesh = new InstancedMesh(geometry, material, points.length);
-    mesh.castShadow = mesh.receiveShadow = true;
-    scene.add(mesh);
+  if (mesh) {
+    scene.remove(mesh);
+    mesh = null;
   }
+  mesh = new InstancedMesh(geometry, material, points.length);
+  mesh.castShadow = mesh.receiveShadow = true;
+  scene.add(mesh);
 
   const t = new Vector3();
   const n = new Vector3();
   const n2 = new Vector3();
+  const dummy = new Object3D();
 
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
@@ -166,7 +168,7 @@ function distributeGrass() {
     p.toArray(positionData, i * 3);
     
     t.copy(p);
-    // distort(p);
+    distort(p);
     dummy.position.copy(p);
     dummy.scale.set(1, 1, 0.1);
     calcNormal(t, distort, n);
@@ -187,7 +189,7 @@ function distributeGrass() {
   mesh.instanceMatrix.needsUpdate = true;
   mesh.instanceColor.needsUpdate = true;
 
-  if (!curlPass) {
+  // if (curlPass) {
     curlPass = new CurlPass(
       renderer,
       new DataTexture(
@@ -207,7 +209,7 @@ function distributeGrass() {
     );
 
     material.uniforms.curlMap.value = curlPass.texture;
-  }
+  // }
 
   curlPass.shader.uniforms.persistence.value = randomInRange(1, 1.5);
   curlPass.shader.uniforms.speed.value = randomInRange(0.5, 1.5);
