@@ -199,7 +199,7 @@ function distributeGrass() {
   const positionData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
 
-  const mainOffset = localVector3.set((Math.random() * 2 - 1) * 100, 0, (Math.random() * 2 - 1) * 100)
+  const mainOffset = localVector3.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(size / 2 * Math.sqrt(2));
   // console.log('main offset', mainOffset.toArray());
