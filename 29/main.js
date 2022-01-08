@@ -165,7 +165,7 @@ function distributeGrass() {
 
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
-    
+    p.toArray(positionData, i * 3);
     
     t.copy(p);
     distort(p);
@@ -179,8 +179,6 @@ function distributeGrass() {
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
-
-    p.toArray(positionData, i * 3);
 
     mesh.setColorAt(
       i,
