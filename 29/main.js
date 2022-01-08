@@ -135,8 +135,8 @@ function calcNormal(p, fn, n) {
 }
 
 let mesh;
-// let numPoints = 100000;
-let numPoints = 300000;
+let numPoints = 100000;
+// let numPoints = 300000;
 
 function distributeGrass() {
   const distort = generateDistortFn();
@@ -164,7 +164,7 @@ function distributeGrass() {
     scene.remove(mesh);
     mesh = null;
   }
-  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.01, 1, 2, 10));
+  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.015, 1, 2, 10));
   const trans = new Matrix4().makeTranslation(0, -0.5, 0);
   geometry.applyMatrix4(trans);
   const rot = new Matrix4().makeRotationX(-Math.PI / 2);
