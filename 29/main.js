@@ -234,8 +234,11 @@ function distributeGrass() {
     dummy.lookAt(t);
     // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
     dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
-    // dummy.position.sub(mainP);
+    dummy.position.sub(mainP);
     dummy.updateMatrix();
+    dummy.matrix.elements[3] = mainP.x;
+    dummy.matrix.elements[7] = mainP.y;
+    dummy.matrix.elements[11] = mainP.z;
     mesh.setMatrixAt(i, dummy.matrix);
 
     // p.multiplyScalar(0.5);

@@ -69,10 +69,11 @@ vec3 rotateVectorAxisAngle(vec3 v, vec3 axis, float angle) {
 }
 
 void main() {
-  float cover = .25;
+  const float cover = .25;
+  vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
 
   vUv = vec2(uv.x, 1.-uv.y);
-  vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz;
+  vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz + offset;
   vec3 dBoulder = (boulder-base);
   vLight = (1./length(dBoulder))/5.;
   vLight = pow(vLight, 2.);
@@ -103,10 +104,16 @@ void main() {
   vDry = c.a;
 
   p = (instanceMatrix * vec4(p, 1.0)).xyz;
-  p *= scale;
-  
-  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-  gl_Position = projectionMatrix * mvPosition;;
+
+  // if (offset.x != 0.) {
+    p += offset;
+
+    p *= scale;
+    vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mvPosition;;
+  /* } else {
+    gl_Position = vec4(0.);
+  } */
 }`;
 
 const fragmentShader = `precision highp float;
