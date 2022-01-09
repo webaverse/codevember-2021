@@ -149,9 +149,10 @@ vec4 multiplyQuaternions(vec4 a, vec4 b) {
 const float bladeLength = 0.1;
 const float cover = .25;
 void main() {
-  float id = float(int(instanceColor.x));
+  // float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  vec2 curlUv = instanceColor.yz;
+  // vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
   curlUv.x += 0.5 / curlTSize.x;
   curlUv.y += 0.5 / curlTSize.y;
   
