@@ -61,7 +61,7 @@ const sphere = new Mesh(
 );
 // scene.add(sphere);
 
-const scale = 5;
+const scale = 3;
 const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
@@ -163,7 +163,7 @@ function calcNormal(p, fn, n) {
     // n.z *= -1;
     // n.multiplyScalar(-1);
   // }
-  // n.lerp(up, 0.3);
+  n.lerp(up, 0.3);
 }
 
 let mesh;
