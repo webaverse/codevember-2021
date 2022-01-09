@@ -216,7 +216,6 @@ void main() {
   float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
-  
   vec4 curlV = texture(curlMap, curlUv2);
 
   vec3 positionV = texture(offsetTexture2, curlUv).rgb;
@@ -248,14 +247,12 @@ void main() {
   float h = (1.+ curlV.a);
   float l = length(dBoulder) > 0. ? (length(dBoulder)/cover) : 0.;
   vec3 pNormal = (transpose(inverse(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
-  // pNormal.xz -= dBoulder.xz;
-  // pNormal = normalize(pNormal);
-  vec3 target = normalize(position + pNormal ) * h;
+  vec3 target = normalize(position + pNormal) * h;
   vNormal = normalMatrix * normal;
   vec3 p = position;
-  p = rotateVectorAxisAngle(p, vec3(0, 0, 1.), PI/2.+ atan(direction.z, direction.x));
-  float f = min(inCubic(position.z), 1.);
+  float f = inCubic(position.z);
   p = mix(p, target, f);
+  p = rotateVectorAxisAngle(p, vec3(0, 0, 1.), PI/2.+ atan(direction.z, direction.x));
   // p = mix(p, p - dBoulder * l, f);
   // p *= length(dBoulder);
 
@@ -268,11 +265,6 @@ void main() {
     maxRange,
     offset
   );
-
-  /* vec3 minOffset = vec3(-10., 0, 10.) - cameraTarget*scale;
-  vec3 maxOffset = vec3(10., 0, 10.) - cameraTarget*scale;
-  vec3 offsetSize = maxOffset - minOffset;
-  offset = mod((offset - minOffset) / offsetSize, 1.) * offsetSize + minOffset; */
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));
