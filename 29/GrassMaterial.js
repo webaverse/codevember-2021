@@ -155,7 +155,7 @@ void main() {
   // vec2 quaternionT2Size = vec2(textureSize(quaternionTexture2, 0));
   // vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
   // vec2 curlUv = instanceColor.yz;
-  vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
+  vec2 curlUv = vec2(mod(id + 0.5, curlTSize.x)/(curlTSize.x), ((id + 0.5)/curlTSize.x)/(curlTSize.y));
   // vec2 offsetUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
   // vec2 quaternionUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
   // vec2 quaternionUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
