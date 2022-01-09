@@ -15,6 +15,7 @@ import {
   PlaneBufferGeometry,
   Vector3,
   Vector2,
+  Quaternion,
   Matrix4,
   Mesh,
   IcosahedronBufferGeometry,
@@ -226,6 +227,7 @@ function distributeGrass() {
 
   const offsetData = new Float32Array(width * height * 3);
   const quaternionData = new Float32Array(width * height * 4);
+  const quaternionData2 = new Float32Array(width * height * 4);
   const scaleData = new Float32Array(width * height * 3);
 
   const t = new Vector3();
@@ -236,6 +238,7 @@ function distributeGrass() {
   const localVector2 = new Vector3();
   const localVector3 = new Vector3();
   const localVector4 = new Vector3();
+  const localQuaternion = new Quaternion();
 
   const curlData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
@@ -273,6 +276,7 @@ function distributeGrass() {
     // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
     dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
+    const baseQuaternion = localQuaternion.copy(dummy.quaternion);
     // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
     const ang = randomInRange(-rotation, rotation);
     dummy.rotateOnAxis(n, ang);
@@ -284,8 +288,9 @@ function distributeGrass() {
     mesh.setMatrixAt(i, dummy.matrix);
 
     dummy.position.toArray(offsetData, i * 3);
-    n.toArray(quaternionData, i * 4);
-    quaternionData[i * 4 + 3] = ang;
+    baseQuaternion.toArray(quaternionData, i * 4);
+    n.toArray(quaternionData2, i * 4);
+    quaternionData2[i * 4 + 3] = ang;
     dummy.scale.toArray(scaleData, i * 3);
 
     // p.multiplyScalar(0.5);
@@ -330,6 +335,20 @@ function distributeGrass() {
     LinearFilter,
   );
   material.uniforms.quaternionTexture.value = quaternionTexture;
+
+  const quaternionTexture2 = new DataTexture(
+    quaternionData2,
+    width,
+    height,
+    RGBAFormat,
+    FloatType,
+    undefined,
+    RepeatWrapping,
+    RepeatWrapping,
+    LinearFilter,
+    LinearFilter,
+  );
+  material.uniforms.quaternionTexture2.value = quaternionTexture2;
 
   const scaleTexture = new DataTexture(
     scaleData,

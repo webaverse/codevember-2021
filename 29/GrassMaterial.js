@@ -28,6 +28,7 @@ uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform sampler2D offsetTexture;
 uniform sampler2D quaternionTexture;
+uniform sampler2D quaternionTexture2;
 uniform sampler2D scaleTexture;
 
 uniform mat4 modelMatrix;
@@ -130,6 +131,19 @@ vec4 getQuaternionFromAxisAngle(vec3 axis, float angle) {
   
   return q;
 }
+vec4 multiplyQuaternions(vec4 a, vec4 b) {
+  vec4 q = vec4(0.);
+  
+  float qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
+  float qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
+
+  q.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+  q.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+  q.z = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+  q.w = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
+  
+  return q;
+}
 
 const float cover = .25;
 void main() {
@@ -137,18 +151,22 @@ void main() {
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 offsetTSize = vec2(textureSize(offsetTexture, 0));
   vec2 quaternionTSize = vec2(textureSize(quaternionTexture, 0));
+  vec2 quaternionT2Size = vec2(textureSize(quaternionTexture2, 0));
   vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
   // vec2 curlUv = instanceColor.yz;
   vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
   vec2 offsetUv = vec2(mod(id, offsetTSize.x)/(offsetTSize.x), (id/offsetTSize.x)/(offsetTSize.y));
   vec2 quaternionUv = vec2(mod(id, quaternionTSize.x)/(quaternionTSize.x), (id/quaternionTSize.x)/(quaternionTSize.y));
+  vec2 quaternionUv2 = vec2(mod(id, quaternionT2Size.x)/(quaternionT2Size.x), (id/quaternionT2Size.x)/(quaternionT2Size.y));
   vec2 scaleUv = vec2(mod(id, scaleTSize.x)/(scaleTSize.x), (id/scaleTSize.x)/(scaleTSize.y));
   
   vec4 curlV = texture(curlMap, curlUv);
   vec3 offsetV = texture(offsetTexture, offsetUv).rgb;
-  vec4 axisAngleV = texture(quaternionTexture, quaternionUv).rgba;
+  vec4 quaternionV1 = texture(quaternionTexture, quaternionUv).rgba;
+  vec4 axisAngleV = texture(quaternionTexture2, quaternionUv2).rgba;
+  vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
+  vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
   vec3 scaleV = texture(scaleTexture, scaleUv).rgb;
-  vec4 quaternionV = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   mat4 instanceMatrix2 = compose(offsetV, quaternionV, scaleV);
   vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
 
@@ -247,6 +265,7 @@ class GrassMaterial extends RawShaderMaterial {
         direction: { value: new Vector3() },
         offsetTexture: { value: null },
         quaternionTexture: { value: null },
+        quaternionTexture2: { value: null },
         scaleTexture: { value: null },
       },
       side: DoubleSide,
