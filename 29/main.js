@@ -31,6 +31,7 @@ import {
   CanvasTexture,
   EdgesHelper,
   MeshStandardMaterial,
+  ShaderMaterial,
   TextureLoader,
 } from 'three';
 import * as THREE from 'three';
@@ -59,22 +60,50 @@ const sphere = new Mesh(
 // scene.add(sphere);
 
 const scale = 5;
-// const textureLoader = new TextureLoader();
+const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
     .applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)),
-  new MeshStandardMaterial({
-    emissive: new THREE.Color(75./255, 112./255, 34./255).multiplyScalar(0.35).getHex(),
+  new ShaderMaterial({
+    vertexShader: `\
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `\
+      uniform sampler2D colorTexture;
+      uniform sampler2D heightTexture;
+      varying vec2 vUv;
+      const vec3 baseColor = vec3(${new THREE.Color(75./255, 112./255, 34./255).multiplyScalar(1).toArray().join(', ')});
+      void main() {
+        vec3 height = texture2D(colorTexture, vUv).rgb;
+        float h = (height.r + height.g + height.b) / 3.0;
+        gl_FragColor = vec4(baseColor * h, 1.0);
+      }
+    `,
+    uniforms: {
+      colorTexture: {
+        value: textureLoader.load('https://webaverse.github.io/codevember-2021/29/Vol_39_5_Base_Color.png'),
+      },
+      heightTexture: {
+        value: textureLoader.load('https://webaverse.github.io/codevember-2021/29/Vol_39_5_Height.png'),
+      },
+    },
+    // emissive: new THREE.Color(75./255, 112./255, 34./255).multiplyScalar(0.35).getHex(),
     // emissive: 0xffffff,
     // emissiveMap: textureLoader.load('/codevember-2021/29/Vol_39_5_Base_Color.png'),
     side: DoubleSide,
   }),
 );
-// plane.material.emissiveMap.wrapS = RepeatWrapping;
-// plane.material.emissiveMap.wrapT = RepeatWrapping;
+plane.material.uniforms.colorTexture.value.wrapS = RepeatWrapping;
+plane.material.uniforms.colorTexture.value.wrapT = RepeatWrapping;
+plane.material.uniforms.heightTexture.value.wrapS = RepeatWrapping;
+plane.material.uniforms.heightTexture.value.wrapT = RepeatWrapping;
 for (let i = 0; i < plane.geometry.attributes.uv.count; i++) {
-  plane.geometry.attributes.uv.array[i * 2 + 0] *= 20;
-  plane.geometry.attributes.uv.array[i * 2 + 1] *= 20;
+  plane.geometry.attributes.uv.array[i * 2 + 0] *= 50;
+  plane.geometry.attributes.uv.array[i * 2 + 1] *= 50;
 }
 scene.add(plane);
 

@@ -168,9 +168,9 @@ class Post {
   }
 
   render(scene, camera) {
-    this.renderer.setRenderTarget(this.colorFBO);
-    this.renderer.render(scene, camera, this.colorFBO);
-    this.renderer.setRenderTarget(null);
+    // this.renderer.setRenderTarget(this.colorFBO);
+    this.renderer.render(scene, camera);
+    /* this.renderer.setRenderTarget(null);
 
     this.colorPass.shader.uniforms.inputTexture.value = this.colorFBO.texture;
     this.colorPass.render(this.renderer);
@@ -190,7 +190,7 @@ class Post {
       this.bloomPass.blurPasses[4].texture;
     this.finalPass.shader.uniforms.time.value = Math.random() * 100000;
 
-    this.finalPass.render(this.renderer, true);
+    this.finalPass.render(this.renderer, true); */
   }
 }
 
