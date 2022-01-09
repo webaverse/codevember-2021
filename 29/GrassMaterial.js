@@ -26,7 +26,7 @@ uniform vec3 direction;
 uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-uniform sampler2D offsetTexture;
+// uniform sampler2D offsetTexture;
 uniform sampler2D offsetTexture2;
 uniform sampler2D quaternionTexture;
 uniform sampler2D quaternionTexture2;
@@ -148,16 +148,18 @@ vec4 multiplyQuaternions(vec4 a, vec4 b) {
 
 const float bladeLength = 0.1;
 const float cover = .25;
+const float size = 4.;
 void main() {
-  // float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 curlUv = instanceColor.yz;
-  // vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
-  curlUv.x += 0.5 / curlTSize.x;
-  curlUv.y += 0.5 / curlTSize.y;
+  vec3 offset = vec3(curlUv.x, 0., curlUv.y);
+  curlUv /= size;
   
-  vec4 curlV = texture(curlMap, curlUv);
-  vec3 offset = texture(offsetTexture, curlUv).rgb;
+  float id = float(int(instanceColor.x));
+  vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  curlUv += vec2(0.5/curlTSize.x, 0.5/curlTSize.y);
+  vec4 curlV = texture(curlMap, curlUv2);
+  // vec3 offset = texture(offsetTexture, curlUv).rgb;
   // vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
   vec3 positionV = texture(offsetTexture2, curlUv).rgb;
   vec4 quaternionV1 = texture(quaternionTexture, curlUv).rgba;
@@ -261,7 +263,7 @@ class GrassMaterial extends RawShaderMaterial {
         blade: { value: blade },
         cameraTarget: { value: new Vector3() },
         direction: { value: new Vector3() },
-        offsetTexture: { value: null },
+        // offsetTexture: { value: null },
         offsetTexture2: { value: null },
         quaternionTexture: { value: null },
         quaternionTexture2: { value: null },

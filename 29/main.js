@@ -178,7 +178,7 @@ addUpdate(() => {
 function distributeGrass() {
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
-  const width = nextPowerOfTwo(Math.sqrt(numPoints));
+  const width = nextPowerOfTwo(Math.sqrt(numPoints)) * 4;
   const height = Math.ceil(numPoints / width);
 
   const distort = generateDistortFn();
@@ -222,7 +222,7 @@ function distributeGrass() {
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
 
-  const offsetData = new Float32Array(width * height * 3);
+  // const offsetData = new Float32Array(width * height * 3);
   const offsetData2 = new Float32Array(width * height * 3);
   const quaternionData = new Float32Array(width * height * 4);
   const quaternionData2 = new Float32Array(width * height * 4);
@@ -241,73 +241,51 @@ function distributeGrass() {
   const curlData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
 
-  const mainOffset = localVector3.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
+  const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(size / 2 * Math.sqrt(2));
-  // console.log('main offset', mainOffset.toArray());
-  // const mainOffset = localVector3.set(-500, 0, -500);
   const nf = 0.3;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
+      const mainP = localVector3.copy(p);
+      
+      t.copy(p);
+      dummy.position.copy(p);
+      dummy.scale.set(1, 1, 0.1);
+      t.add(mainOffset);
+      calcNormal(t, distort, n);
+      n.lerp(up, nf);
+      t.copy(p).add(n);
+      dummy.up.set(0, 0, 1);
+      dummy.lookAt(t);
+      const baseQuaternion = localQuaternion.copy(dummy.quaternion);
+      const ang = randomInRange(-rotation, rotation);
+      dummy.rotateOnAxis(n, ang);
+      dummy.position.sub(mainP);
+
+      // compute the index into the data texture array
+      const index = y * width + x;
+      dummy.position.toArray(offsetData2, index * 3);
+      baseQuaternion.toArray(quaternionData, index * 4);
+      n.toArray(quaternionData2, index * 4);
+      quaternionData2[index * 4 + 3] = ang;
+    }
+  }
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
-    const mainP = localVector4.copy(p);
-    
-    t.copy(p);
-    // distort(t);
-    // t.add(mainOffset);
-    dummy.position.copy(p);
-    dummy.scale.set(1, 1, 0.1);
-    // t.multiplyScalar(0.1);
-    t.add(mainOffset);
-    calcNormal(t, distort, n);
-    n.lerp(up, nf);
-    // n.y += perlin3(100, (n.y * 2 - 1) * 100, 100) * 0.5;
-    // n.normalize();
-    // n.x *= Math.random() < 0.5 ? 1 : -1;
-    // n.y *= Math.random() < 0.5 ? 1 : -1;
-    // n.z *= Math.random() < 0.5 ? 1 : -1;
-    /* n.add(
-      localVector2.set(
-        Math.random() * 2 - 1,
-        Math.random() * 2 - 1,
-        Math.random() * 2 - 1,
-      ).normalize().multiplyScalar(0.3)
-    ).normalize(); */
-    t.copy(p).add(n);
-    // dummy.up.set((Math.random() * 2 - 1) * 0.1, 1, (Math.random() * 2 - 1) * 0.1).normalize();
-    dummy.up.set(0, 0, 1);
-    dummy.lookAt(t);
-    const baseQuaternion = localQuaternion.copy(dummy.quaternion);
-    // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
-    const ang = randomInRange(-rotation, rotation);
-    dummy.rotateOnAxis(n, ang);
-    dummy.position.sub(mainP);
-    // dummy.updateMatrix();
-    // dummy.matrix.elements[3] = mainP.x;
-    // dummy.matrix.elements[7] = mainP.y;
-    // dummy.matrix.elements[11] = mainP.z;
-    // mesh.setMatrixAt(i, dummy.matrix);
-
-    mainP.toArray(offsetData, i * 3);
-    dummy.position.toArray(offsetData2, i * 3);
-    baseQuaternion.toArray(quaternionData, i * 4);
-    n.toArray(quaternionData2, i * 4);
-    quaternionData2[i * 4 + 3] = ang;
-    // dummy.scale.toArray(scaleData, i * 3);
-
-    // p.multiplyScalar(0.5);
-    // distort(p);
     p.toArray(curlData, i * 3);
-
     mesh.setColorAt(
       i,
-      new Vector3(i, (i % width) / width, Math.floor(i / width) / height)
+      new Vector3(i, p.x, p.z)
     );
   }
+  window.points = points;
 
   mesh.instanceMatrix.needsUpdate = true;
   mesh.instanceColor.needsUpdate = true;
 
-  const offsetTexture = new DataTexture(
+  /* const offsetTexture = new DataTexture(
     offsetData,
     width,
     height,
@@ -319,7 +297,7 @@ function distributeGrass() {
     NearestFilter,
     NearestFilter,
   );
-  material.uniforms.offsetTexture.value = offsetTexture;
+  material.uniforms.offsetTexture.value = offsetTexture; */
   
   const offsetTexture2 = new DataTexture(
     offsetData2,
@@ -330,8 +308,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    NearestFilter,
-    NearestFilter,
+    LinearFilter,
+    LinearFilter,
   );
   material.uniforms.offsetTexture2.value = offsetTexture2;
 
@@ -344,8 +322,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    NearestFilter,
-    NearestFilter,
+    LinearFilter,
+    LinearFilter,
   );
   material.uniforms.quaternionTexture.value = quaternionTexture;
 
@@ -358,8 +336,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    NearestFilter,
-    NearestFilter,
+    LinearFilter,
+    LinearFilter,
   );
   material.uniforms.quaternionTexture2.value = quaternionTexture2;
 
