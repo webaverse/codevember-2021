@@ -149,6 +149,41 @@ vec4 multiplyQuaternions(vec4 a, vec4 b) {
 const float bladeLength = 0.1;
 const float cover = .25;
 const float size = 4.;
+vec2 uvWarp(vec2 uv, int dx, int dy) {
+  return mod(uv + 0.25 + vec2(dx, dy) * 0.5, 1.);
+}
+// this function takes a uv coordinate in [0, 1] and returns the distance to the closest side of the square
+float distanceToSide(vec2 uv) {
+  float d = min(abs(uv.x - 0.5), abs(uv.y - 0.5));
+  return 1. - d*2.;
+}
+vec4 fourTap4(sampler2D tex, vec2 uv) {
+  vec4 sum = vec4(0.);
+  float totalWeight = 0.;
+  for (int dx=0; dx<2; ++dx) {
+    for (int dy=0; dy<2; ++dy) {
+      vec2 uv2 = uvWarp(uv, dx, dy);
+      float w = distanceToSide(uv2);
+      sum += texture(tex, uv2).rgba * w;
+      totalWeight += w;
+    }
+  }
+  return sum / totalWeight;
+}
+vec3 fourTap3(sampler2D tex, vec2 uv) {
+  vec3 sum = vec3(0.);
+  float totalWeight = 0.;
+  for (int dx=0; dx<2; ++dx) {
+    for (int dy=0; dy<2; ++dy) {
+      vec2 uv2 = uvWarp(uv, dx, dy);
+      float w = distanceToSide(uv2);
+      sum += texture(tex, uv2).rgb * w;
+      totalWeight += w;
+    }
+  }
+  return sum / totalWeight;
+}
+
 void main() {
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 curlUv = instanceColor.yz;
@@ -159,14 +194,11 @@ void main() {
   vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
   curlUv += vec2(0.5/curlTSize.x, 0.5/curlTSize.y);
   vec4 curlV = texture(curlMap, curlUv2);
-  // vec3 offset = texture(offsetTexture, curlUv).rgb;
-  // vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
-  vec3 positionV = texture(offsetTexture2, curlUv).rgb;
-  vec4 quaternionV1 = texture(quaternionTexture, curlUv).rgba;
-  vec4 axisAngleV = texture(quaternionTexture2, curlUv).rgba;
+  vec3 positionV = fourTap3(offsetTexture2, curlUv);
+  vec4 quaternionV1 = fourTap4(quaternionTexture, curlUv);
+  vec4 axisAngleV = fourTap4(quaternionTexture2, curlUv);
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
-  // vec3 scaleV = texture(scaleTexture, curlUv).rgb;
   vec3 scaleV = vec3(1., 1., bladeLength);
   mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
 
