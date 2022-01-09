@@ -30,7 +30,7 @@ uniform sampler2D offsetTexture;
 uniform sampler2D offsetTexture2;
 uniform sampler2D quaternionTexture;
 uniform sampler2D quaternionTexture2;
-uniform sampler2D scaleTexture;
+// uniform sampler2D scaleTexture;
 
 uniform mat4 modelMatrix;
 
@@ -264,7 +264,7 @@ class GrassMaterial extends RawShaderMaterial {
         offsetTexture2: { value: null },
         quaternionTexture: { value: null },
         quaternionTexture2: { value: null },
-        scaleTexture: { value: null },
+        // scaleTexture: { value: null },
       },
       side: DoubleSide,
       transparent: true,

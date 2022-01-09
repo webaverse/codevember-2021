@@ -226,7 +226,7 @@ function distributeGrass() {
   const offsetData2 = new Float32Array(width * height * 3);
   const quaternionData = new Float32Array(width * height * 4);
   const quaternionData2 = new Float32Array(width * height * 4);
-  const scaleData = new Float32Array(width * height * 3);
+  // const scaleData = new Float32Array(width * height * 3);
 
   const t = new Vector3();
   const n = new Vector3();
@@ -292,7 +292,7 @@ function distributeGrass() {
     baseQuaternion.toArray(quaternionData, i * 4);
     n.toArray(quaternionData2, i * 4);
     quaternionData2[i * 4 + 3] = ang;
-    dummy.scale.toArray(scaleData, i * 3);
+    // dummy.scale.toArray(scaleData, i * 3);
 
     // p.multiplyScalar(0.5);
     // distort(p);
@@ -363,7 +363,7 @@ function distributeGrass() {
   );
   material.uniforms.quaternionTexture2.value = quaternionTexture2;
 
-  const scaleTexture = new DataTexture(
+  /* const scaleTexture = new DataTexture(
     scaleData,
     width,
     height,
@@ -375,7 +375,7 @@ function distributeGrass() {
     NearestFilter,
     NearestFilter,
   );
-  material.uniforms.scaleTexture.value = scaleTexture;
+  material.uniforms.scaleTexture.value = scaleTexture; */
 
   curlPass = new CurlPass(
     renderer,
