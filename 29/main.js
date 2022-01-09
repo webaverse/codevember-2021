@@ -274,7 +274,8 @@ function distributeGrass() {
     dummy.up.set(0, 0, 1);
     dummy.lookAt(t);
     // dummy.rotateOnAxis(new Vector3(0, 1, 0), randomInRange(-rotation, rotation));
-    dummy.rotateOnAxis(n, randomInRange(-rotation, rotation));
+    const ang = randomInRange(-rotation, rotation);
+    dummy.rotateOnAxis(n, ang);
     dummy.position.sub(mainP);
     dummy.updateMatrix();
     dummy.matrix.elements[3] = mainP.x;
@@ -283,7 +284,8 @@ function distributeGrass() {
     mesh.setMatrixAt(i, dummy.matrix);
 
     dummy.position.toArray(offsetData, i * 3);
-    dummy.quaternion.toArray(quaternionData, i * 4);
+    n.toArray(quaternionData, i * 4);
+    quaternionData[i * 4 + 3] = ang;
     dummy.scale.toArray(scaleData, i * 3);
 
     // p.multiplyScalar(0.5);

@@ -114,6 +114,22 @@ mat4 compose(vec3 position, vec4 quaternion, vec3 scale) {
 
   return te;
 }
+vec4 getQuaternionFromAxisAngle(vec3 axis, float angle) {
+  vec4 q = vec4(0.);
+
+  // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+
+  // assumes axis is normalized
+
+  float halfAngle = angle / 2., s = sin(halfAngle);
+
+  q.x = axis.x * s;
+  q.y = axis.y * s;
+  q.z = axis.z * s;
+  q.w = cos(halfAngle);
+  
+  return q;
+}
 
 const float cover = .25;
 void main() {
@@ -130,8 +146,9 @@ void main() {
   
   vec4 curlV = texture(curlMap, curlUv);
   vec3 offsetV = texture(offsetTexture, offsetUv).rgb;
-  vec4 quaternionV = texture(quaternionTexture, quaternionUv).rgba;
+  vec4 axisAngleV = texture(quaternionTexture, quaternionUv).rgba;
   vec3 scaleV = texture(scaleTexture, scaleUv).rgb;
+  vec4 quaternionV = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   mat4 instanceMatrix2 = compose(offsetV, quaternionV, scaleV);
   vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
 
