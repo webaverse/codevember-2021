@@ -184,9 +184,12 @@ vec4 maxTap4(sampler2D tex, vec2 uv) {
     }
   }
   // return vec4(normalize(sum.rgb), sum.a);
-  sum.a /= totalWeight;
+  // sum.a /= totalWeight;
+  // sum.a = pow(sum.a, 0.5);
+  sum.a *= 0.5;
   // sum.a *= 1.5;
-  sum.rgb *= 0.8;
+  // sum.a = min(sum.a, 1.);
+  // sum.rgb *= 0.7;
   return sum;
 }
 vec3 fourTap3(sampler2D tex, vec2 uv) {
@@ -271,7 +274,7 @@ void main() {
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));
-  p.y *= 1.5;
+  // p.y *= 1.5;
   p *= scale;
   
   vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);

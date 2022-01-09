@@ -62,7 +62,7 @@ const sphere = new Mesh(
 );
 // scene.add(sphere);
 
-const scale = 5;
+const scale = 6;
 const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
@@ -142,7 +142,7 @@ function calcNormal(p, fn, n) {
   const binormal = new Vector3().crossVectors(normal, tangent);
   // fn(binormal);
 
-  const offset = 1;
+  const offset = 0.5;
   const a = new Vector3().copy(p).add(tangent.clone().multiplyScalar(offset));
   const b = new Vector3().copy(p).add(binormal.clone().multiplyScalar(offset));
 
@@ -206,7 +206,7 @@ function distributeGrass() {
     scene.remove(mesh);
     mesh = null;
   }
-  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.015, 1, 2, 10));
+  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.02, 1, 2, 10));
   const trans = new Matrix4().makeTranslation(0, -0.5, 0);
   geometry.applyMatrix4(trans);
   const rot = new Matrix4().makeRotationX(-Math.PI / 2);
@@ -243,11 +243,12 @@ function distributeGrass() {
 
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
-    .multiplyScalar(size / 2 * Math.sqrt(2));
-  const normalFactor = 0.3;
+    .multiplyScalar(Math.sqrt(2 * size / 2));
+  const normalFactor = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
+      // p.multiplyScalar(0.5);
       const mainP = localVector3.copy(p);
       
       t.copy(p);
@@ -368,8 +369,8 @@ function distributeGrass() {
       undefined,
       RepeatWrapping,
       RepeatWrapping,
-      NearestFilter,
-      NearestFilter
+      LinearFilter,
+      LinearFilter
     ),
     width,
     height
@@ -401,7 +402,7 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-function setQuality(num) {
+/* function setQuality(num) {
   scene.remove(mesh);
   mesh.geometry.dispose();
   mesh = null;
@@ -421,7 +422,7 @@ document.querySelector("#high").addEventListener("click", (e) => {
   setQuality(300000);
 });
 
-/* document.querySelector("#pauseBtn").addEventListener("click", (e) => {
+document.querySelector("#pauseBtn").addEventListener("click", (e) => {
   running = !running;
 });
 
