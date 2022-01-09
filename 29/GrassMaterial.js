@@ -26,6 +26,9 @@ uniform vec3 direction;
 uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform sampler2D offsetTexture;
+uniform sampler2D quaternionTexture;
+uniform sampler2D scaleTexture;
 
 uniform mat4 modelMatrix;
 
@@ -78,12 +81,63 @@ vec3 modXZ(vec3 minBound, vec3 maxBound, vec3 p) {
   return vec3(res.x, p.y, res.y);
 }
 
+mat4 compose(vec3 position, vec4 quaternion, vec3 scale) {
+  mat4 te = mat4(1.);
+
+  float x = quaternion.x, y = quaternion.y, z = quaternion.z, w = quaternion.w;
+  float x2 = x + x,	y2 = y + y, z2 = z + z;
+  float xx = x * x2, xy = x * y2, xz = x * z2;
+  float yy = y * y2, yz = y * z2, zz = z * z2;
+  float wx = w * x2, wy = w * y2, wz = w * z2;
+
+  float sx = scale.x, sy = scale.y, sz = scale.z;
+
+  te[ 0 ][0] = ( 1. - ( yy + zz ) ) * sx;
+  te[ 1 ][1] = ( xy + wz ) * sx;
+  te[ 2 ][2] = ( xz - wy ) * sx;
+  te[ 3 ][3] = 0.;
+
+  te[ 1 ][0] = ( xy - wz ) * sy;
+  te[ 1 ][1] = ( 1. - ( xx + zz ) ) * sy;
+  te[ 1 ][2] = ( yz + wx ) * sy;
+  te[ 1 ][3] = 0.;
+
+  te[ 2 ][0] = ( xz + wy ) * sz;
+  te[ 2 ][1] = ( yz - wx ) * sz;
+  te[ 2 ][2] = ( 1. - ( xx + yy ) ) * sz;
+  te[ 2 ][3] = 0.;
+
+  te[ 3 ][0] = position.x;
+  te[ 3 ][1] = position.y;
+  te[ 3 ][2] = position.z;
+  te[ 3 ][3] = 1.;
+
+  return te;
+}
+
+const float cover = .25;
 void main() {
-  const float cover = .25;
+  float id = float(int(instanceColor.x));
+  vec2 curlTSize = vec2(textureSize(curlMap, 0));
+  vec2 offsetTSize = vec2(textureSize(offsetTexture, 0));
+  vec2 quaternionTSize = vec2(textureSize(quaternionTexture, 0));
+  vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
+  // vec2 curlUv = instanceColor.yz;
+  vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
+  vec2 offsetUv = vec2(mod(id, offsetTSize.x)/(offsetTSize.x), (id/offsetTSize.x)/(offsetTSize.y));
+  vec2 quaternionUv = vec2(mod(id, quaternionTSize.x)/(quaternionTSize.x), (id/quaternionTSize.x)/(quaternionTSize.y));
+  vec2 scaleUv = vec2(mod(id, scaleTSize.x)/(scaleTSize.x), (id/scaleTSize.x)/(scaleTSize.y));
+  
+  vec4 curlV = texture(curlMap, curlUv);
+  vec3 offsetV = texture(offsetTexture, offsetUv).rgb;
+  vec4 quaternionV = texture(quaternionTexture, quaternionUv).rgba;
+  vec3 scaleV = texture(scaleTexture, scaleUv).rgb;
+  mat4 instanceMatrix2 = compose(offsetV, quaternionV, scaleV);
   vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
 
+  // base position
   vUv = vec2(uv.x, 1.-uv.y);
-  vec3 base = (instanceMatrix * vec4(position.xy, 0., 1.)).xyz + offset;
+  vec3 base = (instanceMatrix2 * vec4(position.xy, 0., 1.)).xyz + offset;
   vec3 dBoulder = (boulder-base);
   vLight = (1./length(dBoulder))/5.;
   vLight = pow(vLight, 2.);
@@ -91,13 +145,9 @@ void main() {
     dBoulder = vec3(0.);
   }
 
-  vec2 tSize = vec2(textureSize(curlMap, 0));
-  float id = float(int(instanceColor.x));
-  vec2 curlUv = instanceColor.yz;
-  curlUv = vec2(mod(id, tSize.x)/(tSize.x), (id/tSize.x)/(tSize.y));
-  vec4 c = texture(curlMap, curlUv);
-  vec3 n = c.xyz;
-  float h = (1.+ c.a);
+  // curl
+  vec3 n = curlV.xyz;
+  float h = (1.+ curlV.a);
   float l = length(dBoulder) > 0. ? (length(dBoulder)/cover) : 0.;
   vec3 pNormal = (transpose(inverse(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
   // pNormal.xz -= dBoulder.xz;
@@ -111,9 +161,9 @@ void main() {
   // p = mix(p, p - dBoulder * l, f);
   // p *= length(dBoulder);
 
-  vDry = c.a;
+  vDry = curlV.a;
 
-  p = (instanceMatrix * vec4(p, 1.0)).xyz;
+  p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
 
   const float offsetRange = 2.;
   vec3 ct = cameraTarget/scale;
@@ -176,6 +226,9 @@ class GrassMaterial extends RawShaderMaterial {
         blade: { value: blade },
         cameraTarget: { value: new Vector3() },
         direction: { value: new Vector3() },
+        offsetTexture: { value: null },
+        quaternionTexture: { value: null },
+        scaleTexture: { value: null },
       },
       side: DoubleSide,
       transparent: true,

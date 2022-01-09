@@ -21,6 +21,7 @@ import {
   MeshBasicMaterial,
   DataTexture,
   RGBFormat,
+  RGBAFormat,
   FloatType,
   ClampToEdgeWrapping,
   RepeatWrapping,
@@ -33,6 +34,7 @@ import {
   MeshStandardMaterial,
   ShaderMaterial,
   TextureLoader,
+  LinearFilter,
 } from 'three';
 import * as THREE from 'three';
 // import { Poisson3D } from "./poisson.js";
@@ -174,6 +176,11 @@ addUpdate(() => {
 }); */
 
 function distributeGrass() {
+  // const width = Math.ceil(Math.sqrt(points.length));
+  // const height = Math.ceil(points.length / width);
+  const width = nextPowerOfTwo(Math.sqrt(numPoints));
+  const height = Math.ceil(numPoints / width);
+
   const distort = generateDistortFn();
 
   /* const tmp = new Vector3();
@@ -217,6 +224,10 @@ function distributeGrass() {
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
 
+  const offsetData = new Float32Array(width * height * 3);
+  const quaternionData = new Float32Array(width * height * 4);
+  const scaleData = new Float32Array(width * height * 3);
+
   const t = new Vector3();
   const n = new Vector3();
   const n2 = new Vector3();
@@ -225,11 +236,6 @@ function distributeGrass() {
   const localVector2 = new Vector3();
   const localVector3 = new Vector3();
   const localVector4 = new Vector3();
-
-  // const width = Math.ceil(Math.sqrt(points.length));
-  // const height = Math.ceil(points.length / width);
-  const width = nextPowerOfTwo(Math.sqrt(points.length));
-  const height = Math.ceil(points.length / width);
 
   const curlData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
@@ -276,6 +282,10 @@ function distributeGrass() {
     dummy.matrix.elements[11] = mainP.z;
     mesh.setMatrixAt(i, dummy.matrix);
 
+    dummy.position.toArray(offsetData, i * 3);
+    dummy.quaternion.toArray(quaternionData, i * 4);
+    dummy.scale.toArray(scaleData, i * 3);
+
     // p.multiplyScalar(0.5);
     // distort(p);
     p.toArray(curlData, i * 3);
@@ -290,6 +300,48 @@ function distributeGrass() {
 
   mesh.instanceMatrix.needsUpdate = true;
   mesh.instanceColor.needsUpdate = true;
+
+  const offsetTexture = new DataTexture(
+    offsetData,
+    width,
+    height,
+    RGBFormat,
+    FloatType,
+    undefined,
+    RepeatWrapping,
+    RepeatWrapping,
+    LinearFilter,
+    LinearFilter,
+  );
+  material.uniforms.offsetTexture.value = offsetTexture;
+
+  const quaternionTexture = new DataTexture(
+    quaternionData,
+    width,
+    height,
+    RGBAFormat,
+    FloatType,
+    undefined,
+    RepeatWrapping,
+    RepeatWrapping,
+    LinearFilter,
+    LinearFilter,
+  );
+  material.uniforms.quaternionTexture.value = quaternionTexture;
+
+  const scaleTexture = new DataTexture(
+    scaleData,
+    width,
+    height,
+    RGBFormat,
+    FloatType,
+    undefined,
+    RepeatWrapping,
+    RepeatWrapping,
+    LinearFilter,
+    LinearFilter,
+  );
+  material.uniforms.scaleTexture.value = scaleTexture;
 
   curlPass = new CurlPass(
     renderer,
