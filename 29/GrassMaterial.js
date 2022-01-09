@@ -145,28 +145,30 @@ vec4 multiplyQuaternions(vec4 a, vec4 b) {
   return q;
 }
 
+const float bladeLength = 0.1;
 const float cover = .25;
 void main() {
   float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 offsetTSize = vec2(textureSize(offsetTexture, 0));
-  vec2 quaternionTSize = vec2(textureSize(quaternionTexture, 0));
-  vec2 quaternionT2Size = vec2(textureSize(quaternionTexture2, 0));
-  vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
+  // vec2 offsetTSize = vec2(textureSize(offsetTexture, 0));
+  // vec2 quaternionTSize = vec2(textureSize(quaternionTexture, 0));
+  // vec2 quaternionT2Size = vec2(textureSize(quaternionTexture2, 0));
+  // vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
   // vec2 curlUv = instanceColor.yz;
   vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
-  vec2 offsetUv = vec2(mod(id, offsetTSize.x)/(offsetTSize.x), (id/offsetTSize.x)/(offsetTSize.y));
-  vec2 quaternionUv = vec2(mod(id, quaternionTSize.x)/(quaternionTSize.x), (id/quaternionTSize.x)/(quaternionTSize.y));
-  vec2 quaternionUv2 = vec2(mod(id, quaternionT2Size.x)/(quaternionT2Size.x), (id/quaternionT2Size.x)/(quaternionT2Size.y));
-  vec2 scaleUv = vec2(mod(id, scaleTSize.x)/(scaleTSize.x), (id/scaleTSize.x)/(scaleTSize.y));
+  // vec2 offsetUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
+  // vec2 quaternionUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
+  // vec2 quaternionUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
+  // vec2 scaleUv = vec2(mod(id, scaleTSize.x)/(scaleTSize.x), (id/scaleTSize.x)/(scaleTSize.y));
   
   vec4 curlV = texture(curlMap, curlUv);
-  vec3 offsetV = texture(offsetTexture, offsetUv).rgb;
-  vec4 quaternionV1 = texture(quaternionTexture, quaternionUv).rgba;
-  vec4 axisAngleV = texture(quaternionTexture2, quaternionUv2).rgba;
+  vec3 offsetV = texture(offsetTexture, curlUv).rgb;
+  vec4 quaternionV1 = texture(quaternionTexture, curlUv).rgba;
+  vec4 axisAngleV = texture(quaternionTexture2, curlUv).rgba;
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
-  vec3 scaleV = texture(scaleTexture, scaleUv).rgb;
+  // vec3 scaleV = texture(scaleTexture, curlUv).rgb;
+  vec3 scaleV = vec3(1., 1., bladeLength);
   mat4 instanceMatrix2 = compose(offsetV, quaternionV, scaleV);
   vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
 
