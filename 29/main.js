@@ -244,7 +244,7 @@ function distributeGrass() {
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(Math.sqrt(2 * size / 2));
-  const normalFactor = 0;
+  const normalFactor = 0.1;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
