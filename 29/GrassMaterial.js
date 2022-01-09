@@ -171,6 +171,7 @@ void main() {
   mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
 
   const float offsetRange = 2.;
+  const float rangeWidth = offsetRange * 2.;
   vec3 ct = cameraTarget/scale;
   vec3 minRange = vec3(ct.x - offsetRange, 0., ct.z - offsetRange);
   vec3 maxRange = vec3(ct.x + offsetRange, 0., ct.z + offsetRange);
@@ -178,17 +179,12 @@ void main() {
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
   vec3 base = (instanceMatrix2 * vec4(position.xy, 0., 1.)).xyz + offset;
-  vec3 dBoulder = (boulder-base);
-  dBoulder = modXZ(
-    minRange,
-    maxRange,
-    dBoulder
-  );
+  vec3 dBoulder = mod(boulder-base + rangeWidth / 2., rangeWidth) - rangeWidth / 2.;
   vLight = (1./length(dBoulder))/5.;
   vLight = pow(vLight, 2.);
-  if(length(dBoulder)>cover) {
+  /* if(length(dBoulder)>cover) {
     dBoulder = vec3(0.);
-  }
+  } */
 
   // curl
   vec3 n = curlV.xyz;
