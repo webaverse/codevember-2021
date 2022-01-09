@@ -188,7 +188,7 @@ vec4 maxTap4(sampler2D tex, vec2 uv) {
   // sum.a = pow(sum.a, 0.5);
   sum.a *= 0.7;
   // sum.a *= 1.5;
-  sum.a = min(sum.a, 1.);
+  // sum.a = min(sum.a, 1.);
   // sum.rgb *= 0.7;
   return sum;
 }
