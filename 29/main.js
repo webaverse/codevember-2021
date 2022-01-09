@@ -218,13 +218,12 @@ function distributeGrass() {
       // vertices[i + 1] = 0.005;
     }
   }
-  // const offsetData = new Float32Array(geometry.attributes.position.count * 3);
-  // geometry.setAttribute('offset', new InstancedBufferAttribute(offsetData, 3));
   mesh = new InstancedMesh(geometry, material, points.length);
   mesh.castShadow = mesh.receiveShadow = true;
   scene.add(mesh);
 
   const offsetData = new Float32Array(width * height * 3);
+  const offsetData2 = new Float32Array(width * height * 3);
   const quaternionData = new Float32Array(width * height * 4);
   const quaternionData2 = new Float32Array(width * height * 4);
   const scaleData = new Float32Array(width * height * 3);
@@ -282,13 +281,14 @@ function distributeGrass() {
     const ang = randomInRange(-rotation, rotation);
     dummy.rotateOnAxis(n, ang);
     dummy.position.sub(mainP);
-    dummy.updateMatrix();
-    dummy.matrix.elements[3] = mainP.x;
-    dummy.matrix.elements[7] = mainP.y;
-    dummy.matrix.elements[11] = mainP.z;
-    mesh.setMatrixAt(i, dummy.matrix);
+    // dummy.updateMatrix();
+    // dummy.matrix.elements[3] = mainP.x;
+    // dummy.matrix.elements[7] = mainP.y;
+    // dummy.matrix.elements[11] = mainP.z;
+    // mesh.setMatrixAt(i, dummy.matrix);
 
-    dummy.position.toArray(offsetData, i * 3);
+    mainP.toArray(offsetData, i * 3);
+    dummy.position.toArray(offsetData2, i * 3);
     baseQuaternion.toArray(quaternionData, i * 4);
     n.toArray(quaternionData2, i * 4);
     quaternionData2[i * 4 + 3] = ang;
@@ -297,8 +297,6 @@ function distributeGrass() {
     // p.multiplyScalar(0.5);
     // distort(p);
     p.toArray(curlData, i * 3);
-
-    // mainP.set(100, 100, 100).toArray(offsetData, i * 3);
 
     mesh.setColorAt(
       i,
@@ -318,10 +316,24 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    LinearFilter,
-    LinearFilter,
+    NearestFilter,
+    NearestFilter,
   );
   material.uniforms.offsetTexture.value = offsetTexture;
+  
+  const offsetTexture2 = new DataTexture(
+    offsetData2,
+    width,
+    height,
+    RGBFormat,
+    FloatType,
+    undefined,
+    RepeatWrapping,
+    RepeatWrapping,
+    NearestFilter,
+    NearestFilter,
+  );
+  material.uniforms.offsetTexture2.value = offsetTexture2;
 
   const quaternionTexture = new DataTexture(
     quaternionData,
@@ -332,8 +344,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    LinearFilter,
-    LinearFilter,
+    NearestFilter,
+    NearestFilter,
   );
   material.uniforms.quaternionTexture.value = quaternionTexture;
 
@@ -346,8 +358,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    LinearFilter,
-    LinearFilter,
+    NearestFilter,
+    NearestFilter,
   );
   material.uniforms.quaternionTexture2.value = quaternionTexture2;
 
@@ -360,8 +372,8 @@ function distributeGrass() {
     undefined,
     RepeatWrapping,
     RepeatWrapping,
-    LinearFilter,
-    LinearFilter,
+    NearestFilter,
+    NearestFilter,
   );
   material.uniforms.scaleTexture.value = scaleTexture;
 

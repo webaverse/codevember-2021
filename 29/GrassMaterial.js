@@ -16,7 +16,7 @@ const vertexShader = `precision highp float;
 in vec3 position;
 in vec3 normal;
 in vec2 uv;
-in mat4 instanceMatrix;
+// in mat4 instanceMatrix;
 in vec3 instanceColor;
 // in vec3 offset;
 
@@ -27,6 +27,7 @@ uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform sampler2D offsetTexture;
+uniform sampler2D offsetTexture2;
 uniform sampler2D quaternionTexture;
 uniform sampler2D quaternionTexture2;
 uniform sampler2D scaleTexture;
@@ -150,27 +151,19 @@ const float cover = .25;
 void main() {
   float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  // vec2 offsetTSize = vec2(textureSize(offsetTexture, 0));
-  // vec2 quaternionTSize = vec2(textureSize(quaternionTexture, 0));
-  // vec2 quaternionT2Size = vec2(textureSize(quaternionTexture2, 0));
-  // vec2 scaleTSize = vec2(textureSize(scaleTexture, 0));
-  // vec2 curlUv = instanceColor.yz;
   vec2 curlUv = vec2(mod(id + 0.5, curlTSize.x)/(curlTSize.x), ((id + 0.5)/curlTSize.x)/(curlTSize.y));
-  // vec2 offsetUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
-  // vec2 quaternionUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
-  // vec2 quaternionUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), (id/curlTSize.x)/(curlTSize.y));
-  // vec2 scaleUv = vec2(mod(id, scaleTSize.x)/(scaleTSize.x), (id/scaleTSize.x)/(scaleTSize.y));
   
   vec4 curlV = texture(curlMap, curlUv);
-  vec3 offsetV = texture(offsetTexture, curlUv).rgb;
+  vec3 offset = texture(offsetTexture, curlUv).rgb;
+  // vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
+  vec3 positionV = texture(offsetTexture2, curlUv).rgb;
   vec4 quaternionV1 = texture(quaternionTexture, curlUv).rgba;
   vec4 axisAngleV = texture(quaternionTexture2, curlUv).rgba;
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
   // vec3 scaleV = texture(scaleTexture, curlUv).rgb;
   vec3 scaleV = vec3(1., 1., bladeLength);
-  mat4 instanceMatrix2 = compose(offsetV, quaternionV, scaleV);
-  vec3 offset = vec3(instanceMatrix[0][3], instanceMatrix[1][3], instanceMatrix[2][3]);
+  mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
@@ -266,6 +259,7 @@ class GrassMaterial extends RawShaderMaterial {
         cameraTarget: { value: new Vector3() },
         direction: { value: new Vector3() },
         offsetTexture: { value: null },
+        offsetTexture2: { value: null },
         quaternionTexture: { value: null },
         quaternionTexture2: { value: null },
         scaleTexture: { value: null },
