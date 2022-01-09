@@ -164,7 +164,6 @@ function calcNormal(p, fn, n) {
     // n.z *= -1;
     // n.multiplyScalar(-1);
   // }
-  n.lerp(up, 0.3);
 }
 
 let mesh;
@@ -248,6 +247,7 @@ function distributeGrass() {
     .multiplyScalar(size / 2 * Math.sqrt(2));
   // console.log('main offset', mainOffset.toArray());
   // const mainOffset = localVector3.set(-500, 0, -500);
+  const nf = 0.3;
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
     const mainP = localVector4.copy(p);
@@ -260,6 +260,7 @@ function distributeGrass() {
     // t.multiplyScalar(0.1);
     t.add(mainOffset);
     calcNormal(t, distort, n);
+    n.lerp(up, nf);
     // n.y += perlin3(100, (n.y * 2 - 1) * 100, 100) * 0.5;
     // n.normalize();
     // n.x *= Math.random() < 0.5 ? 1 : -1;
