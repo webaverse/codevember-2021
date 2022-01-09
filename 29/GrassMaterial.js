@@ -170,10 +170,20 @@ void main() {
   vec3 scaleV = vec3(1., 1., bladeLength);
   mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
 
+  const float offsetRange = 2.;
+  vec3 ct = cameraTarget/scale;
+  vec3 minRange = vec3(ct.x - offsetRange, 0., ct.z - offsetRange);
+  vec3 maxRange = vec3(ct.x + offsetRange, 0., ct.z + offsetRange);
+
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
   vec3 base = (instanceMatrix2 * vec4(position.xy, 0., 1.)).xyz + offset;
   vec3 dBoulder = (boulder-base);
+  dBoulder = modXZ(
+    minRange,
+    maxRange,
+    dBoulder
+  );
   vLight = (1./length(dBoulder))/5.;
   vLight = pow(vLight, 2.);
   if(length(dBoulder)>cover) {
@@ -199,12 +209,10 @@ void main() {
   vDry = curlV.a;
 
   p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
-
-  const float offsetRange = 2.;
-  vec3 ct = cameraTarget/scale;
+  
   offset = modXZ(
-    vec3(ct.x - offsetRange, 0., ct.z - offsetRange),
-    vec3(ct.x + offsetRange, 0., ct.z + offsetRange),
+    minRange,
+    maxRange,
     offset
   );
 
