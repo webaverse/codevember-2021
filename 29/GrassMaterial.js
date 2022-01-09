@@ -151,7 +151,9 @@ const float cover = .25;
 void main() {
   float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 curlUv = vec2(mod(id + 0.5, curlTSize.x)/(curlTSize.x), ((id + 0.5)/curlTSize.x)/(curlTSize.y));
+  vec2 curlUv = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  curlUv.x += 0.5 / curlTSize.x;
+  curlUv.y += 0.5 / curlTSize.y;
   
   vec4 curlV = texture(curlMap, curlUv);
   vec3 offset = texture(offsetTexture, curlUv).rgb;

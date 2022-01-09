@@ -386,8 +386,8 @@ function distributeGrass() {
       RGBFormat,
       FloatType,
       undefined,
-      ClampToEdgeWrapping,
-      ClampToEdgeWrapping,
+      RepeatWrapping,
+      RepeatWrapping,
       NearestFilter,
       NearestFilter
     ),
