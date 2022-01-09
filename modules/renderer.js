@@ -23,8 +23,8 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 const scene = new Scene();
 
-const camera = new PerspectiveCamera(45, 1, 0.1, 100);
-camera.position.set(4, 1, 4);
+const camera = new PerspectiveCamera(60, 1, 0.1, 100);
+camera.position.set(4, 1.5, 4);
 camera.lookAt(scene.position);
 
 const controls = new OrbitControls(camera, renderer.domElement);
