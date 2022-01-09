@@ -186,7 +186,7 @@ vec4 maxTap4(sampler2D tex, vec2 uv) {
   // return vec4(normalize(sum.rgb), sum.a);
   // sum.a /= totalWeight;
   // sum.a = pow(sum.a, 0.5);
-  sum.a *= 0.7;
+  // sum.a *= 0.7;
   // sum.a *= 1.5;
   // sum.a = min(sum.a, 1.);
   // sum.rgb *= 0.7;
@@ -208,18 +208,20 @@ vec3 fourTap3(sampler2D tex, vec2 uv) {
 }
 
 void main() {
-  vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 curlUv = instanceColor.yz;
-  vec3 offset = vec3(curlUv.x, 0., curlUv.y);
-  curlUv /= size;
+  vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
+  vec2 curlUv = instanceColor.yz / size + 0.5;
   
+  // vec2 curlUv2 = curlUv;
+
   float id = float(int(instanceColor.x));
-  // vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
-  // curlUv += vec2(0.5/curlTSize.x, 0.5/curlTSize.y);
-  vec4 curlV = maxTap4(curlMap, curlUv);
-  vec3 positionV = fourTap3(offsetTexture2, curlUv);
-  vec4 quaternionV1 = fourTap4(quaternionTexture, curlUv);
-  vec4 axisAngleV = fourTap4(quaternionTexture2, curlUv);
+  vec2 curlTSize = vec2(textureSize(curlMap, 0));
+  vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  
+  vec4 curlV = texture(curlMap, curlUv2);
+
+  vec3 positionV = texture(offsetTexture2, curlUv).rgb;
+  vec4 quaternionV1 = texture(quaternionTexture, curlUv);
+  vec4 axisAngleV = texture(quaternionTexture2, curlUv);
   vec4 quaternionV2 = getQuaternionFromAxisAngle(axisAngleV.rgb, axisAngleV.a);
   vec4 quaternionV = multiplyQuaternions(quaternionV1, quaternionV2);
   vec3 scaleV = vec3(1., 1., bladeLength);
@@ -252,7 +254,7 @@ void main() {
   vNormal = normalMatrix * normal;
   vec3 p = position;
   p = rotateVectorAxisAngle(p, vec3(0, 0, 1.), PI/2.+ atan(direction.z, direction.x));
-  float f = inCubic(position.z);
+  float f = min(inCubic(position.z), 1.);
   p = mix(p, target, f);
   // p = mix(p, p - dBoulder * l, f);
   // p *= length(dBoulder);

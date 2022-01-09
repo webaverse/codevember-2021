@@ -62,7 +62,7 @@ const sphere = new Mesh(
 );
 // scene.add(sphere);
 
-const scale = 6;
+const scale = 8;
 const textureLoader = new TextureLoader();
 const plane = new Mesh(
   new PlaneBufferGeometry(size * scale, size * scale, 1, 1)
@@ -111,12 +111,12 @@ for (let i = 0; i < plane.geometry.attributes.uv.count; i++) {
 scene.add(plane);
 
 function generateDistortFn() {
-  const a = randomInRange(-1000, 1000);
-  const b = randomInRange(-1000, 1000);
-  const c = randomInRange(-1000, 1000);
-  const radius = randomInRange(0.5, 1);
+  const a = randomInRange(-100, 100);
+  const b = randomInRange(-100, 100);
+  const c = randomInRange(-100, 100);
+  const radius = 1; // randomInRange(0.5, 1);
   return (p) => {
-    p.multiplyScalar(2 + radius * perlin3(p.x + a, p.y + b, p.z + c));
+    p.multiplyScalar(3 + radius * perlin3(p.x + a, p.y + b, p.z + c));
   };
 }
 
@@ -133,7 +133,7 @@ const up = new Vector3(0, 1, 0);
 const down = new Vector3(0, -1, 0);
 
 function calcNormal(p, fn, n) {
-  const normal = p.normalize();
+  const normal = p.clone().normalize();
   //const dPos = p.clone();
   // fn(dPos);
 
@@ -244,7 +244,7 @@ function distributeGrass() {
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(Math.sqrt(2 * size / 2));
-  const normalFactor = 0.1;
+  const normalFactor = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
@@ -258,7 +258,7 @@ function distributeGrass() {
       calcNormal(t, distort, n);
       n.lerp(up, normalFactor);
       t.copy(p).add(n);
-      dummy.up.set(0, 0, 1);
+      dummy.up.set(0, 0, -1);
       dummy.lookAt(t);
       const baseQuaternion = localQuaternion.copy(dummy.quaternion);
       const ang = randomInRange(-rotation, rotation);
@@ -273,7 +273,7 @@ function distributeGrass() {
       quaternionData2[index * 4 + 3] = ang;
       
       // mainP.multiplyScalar(2);
-      mainP.toArray(curlData, index * 3);
+      // mainP.toArray(curlData, index * 3);
     }
   }
   for (let i = 0; i < points.length; i++) {
@@ -282,6 +282,7 @@ function distributeGrass() {
       i,
       new Vector3(i, p.x, p.z)
     );
+    p.toArray(curlData, i * 3);
   }
   window.points = points;
 
