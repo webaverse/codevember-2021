@@ -178,7 +178,7 @@ addUpdate(() => {
 function distributeGrass() {
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
-  const width = nextPowerOfTwo(Math.sqrt(numPoints)) * 4;
+  const width = nextPowerOfTwo(Math.sqrt(numPoints));
   const height = Math.ceil(numPoints / width);
 
   const distort = generateDistortFn();
@@ -227,6 +227,7 @@ function distributeGrass() {
   const quaternionData = new Float32Array(width * height * 4);
   const quaternionData2 = new Float32Array(width * height * 4);
   // const scaleData = new Float32Array(width * height * 3);
+  const curlData = new Float32Array(width * height * 3);
 
   const t = new Vector3();
   const n = new Vector3();
@@ -238,13 +239,12 @@ function distributeGrass() {
   const localVector4 = new Vector3();
   const localQuaternion = new Quaternion();
 
-  const curlData = new Float32Array(width * height * 3);
   const rotation = 0.3; // randomInRange(0, 1);
 
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(size / 2 * Math.sqrt(2));
-  const nf = 0.3;
+  const normalFactor = 0.3;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
@@ -255,7 +255,7 @@ function distributeGrass() {
       dummy.scale.set(1, 1, 0.1);
       t.add(mainOffset);
       calcNormal(t, distort, n);
-      n.lerp(up, nf);
+      n.lerp(up, normalFactor);
       t.copy(p).add(n);
       dummy.up.set(0, 0, 1);
       dummy.lookAt(t);
@@ -270,11 +270,13 @@ function distributeGrass() {
       baseQuaternion.toArray(quaternionData, index * 4);
       n.toArray(quaternionData2, index * 4);
       quaternionData2[index * 4 + 3] = ang;
+      
+      // mainP.multiplyScalar(2);
+      mainP.toArray(curlData, index * 3);
     }
   }
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
-    p.toArray(curlData, i * 3);
     mesh.setColorAt(
       i,
       new Vector3(i, p.x, p.z)
@@ -481,6 +483,7 @@ function render() {
   material.uniforms.boulder.value.copy(boulder.position);
   material.uniforms.time.value = time / 10;
   material.uniforms.scale.value = scale;
+  material.uniforms.size.value = size;
 
   material.uniforms.direction.value.set(0, 0, -1)
     // .add(camera.up)

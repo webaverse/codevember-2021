@@ -37,6 +37,7 @@ uniform mat4 modelMatrix;
 uniform float time;
 uniform sampler2D curlMap;
 uniform vec3 boulder;
+uniform float size;
 
 out vec3 vNormal;
 out vec2 vUv;
@@ -148,9 +149,8 @@ vec4 multiplyQuaternions(vec4 a, vec4 b) {
 
 const float bladeLength = 0.1;
 const float cover = .25;
-const float size = 4.;
 vec2 uvWarp(vec2 uv, int dx, int dy) {
-  return mod(uv + 0.25 + vec2(dx, dy) * 0.5, 1.);
+  return mod(uv - 0.25 + vec2(dx, dy) * 0.5, 1.);
 }
 // this function takes a uv coordinate in [0, 1] and returns the distance to the closest side of the square
 float distanceToSide(vec2 uv) {
@@ -164,11 +164,30 @@ vec4 fourTap4(sampler2D tex, vec2 uv) {
     for (int dy=0; dy<2; ++dy) {
       vec2 uv2 = uvWarp(uv, dx, dy);
       float w = distanceToSide(uv2);
+      // w = pow(w, 2.);
       sum += texture(tex, uv2).rgba * w;
       totalWeight += w;
     }
   }
   return sum / totalWeight;
+}
+vec4 maxTap4(sampler2D tex, vec2 uv) {
+  vec4 sum = vec4(0.);
+  float totalWeight = 0.;
+  for (int dx=0; dx<2; ++dx) {
+    for (int dy=0; dy<2; ++dy) {
+      vec2 uv2 = uvWarp(uv, dx, dy);
+      float w = distanceToSide(uv2);
+      // w = pow(w, 2.);
+      sum += texture(tex, uv2).rgba * w;
+      totalWeight += w;
+    }
+  }
+  // return vec4(normalize(sum.rgb), sum.a);
+  sum.a /= totalWeight;
+  // sum.a *= 1.5;
+  sum.rgb *= 0.8;
+  return sum;
 }
 vec3 fourTap3(sampler2D tex, vec2 uv) {
   vec3 sum = vec3(0.);
@@ -177,6 +196,7 @@ vec3 fourTap3(sampler2D tex, vec2 uv) {
     for (int dy=0; dy<2; ++dy) {
       vec2 uv2 = uvWarp(uv, dx, dy);
       float w = distanceToSide(uv2);
+      // w = pow(w, 2.);
       sum += texture(tex, uv2).rgb * w;
       totalWeight += w;
     }
@@ -191,9 +211,9 @@ void main() {
   curlUv /= size;
   
   float id = float(int(instanceColor.x));
-  vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
-  curlUv += vec2(0.5/curlTSize.x, 0.5/curlTSize.y);
-  vec4 curlV = texture(curlMap, curlUv2);
+  // vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  // curlUv += vec2(0.5/curlTSize.x, 0.5/curlTSize.y);
+  vec4 curlV = maxTap4(curlMap, curlUv);
   vec3 positionV = fourTap3(offsetTexture2, curlUv);
   vec4 quaternionV1 = fourTap4(quaternionTexture, curlUv);
   vec4 axisAngleV = fourTap4(quaternionTexture2, curlUv);
@@ -294,6 +314,7 @@ class GrassMaterial extends RawShaderMaterial {
         scale: { value: 1 },
         curlMap: { value: null },
         boulder: { value: new Vector3() },
+        size: { value: 0 },
         time: { value: 0 },
         persistence: { value: 1 },
         blade: { value: blade },
