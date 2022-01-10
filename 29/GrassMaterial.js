@@ -364,21 +364,16 @@ void main() {
   vec3 offset = vec3(instanceColor.y, 0., instanceColor.z);
   vec2 curlUv = instanceColor.yz / size + 0.5;
   
-  // vec2 curlUv2 = curlUv;
-
-  float id = float(int(instanceColor.x));
-  vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 curlUv2 = vec2(mod(id + 0.5, curlTSize.x)/(curlTSize.x), ((id + 0.5)/curlTSize.x)/(curlTSize.y));
-  // curlUv2 += vec2(0.5/curlTSize.x/2., 0.5/curlTSize.y/2.);
-  // vec4 curlV = texture(curlMap, curlUv2);
-  // vec4 curlV = fourTap4(curlMap, curlUv2);
-  vec4 curlV = colorNoise(curlUv * 2000., 1., 5., 0.5);
-  // curlV.g = abs(curlV.g);
-  // curlV.g = -1.;
-  curlV.rgb *= 25.;
-  curlV.g -= 10.;
-  curlV.a += 0.5;
-  curlV.a *= 1.5;
+  const float offsetRange = 2.;
+  const float rangeWidth = offsetRange * 2.;
+  vec3 ct = cameraTarget/scale;
+  vec3 minRange = vec3(ct.x - offsetRange, 0., ct.z - offsetRange);
+  vec3 maxRange = vec3(ct.x + offsetRange, 0., ct.z + offsetRange);
+  offset = modXZ(
+    minRange,
+    maxRange,
+    offset
+  );
 
   vec3 positionV = texture(offsetTexture2, curlUv).rgb;
   vec4 quaternionV1 = texture(quaternionTexture, curlUv);
@@ -388,11 +383,14 @@ void main() {
   vec3 scaleV = vec3(1., 1., bladeLength);
   mat4 instanceMatrix2 = compose(positionV, quaternionV, scaleV);
 
-  const float offsetRange = 2.;
-  const float rangeWidth = offsetRange * 2.;
-  vec3 ct = cameraTarget/scale;
-  vec3 minRange = vec3(ct.x - offsetRange, 0., ct.z - offsetRange);
-  vec3 maxRange = vec3(ct.x + offsetRange, 0., ct.z + offsetRange);
+  float id = instanceColor.x;
+  vec2 curlTSize = vec2(textureSize(curlMap, 0));
+  vec2 curlUv2 = vec2(offset.x, offset.z);
+  vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 7., 0.5);
+  curlV.rgb *= 30.;
+  curlV.g -= 10.;
+  curlV.a += 0.5;
+  curlV.a *= 1.5;
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
@@ -421,12 +419,6 @@ void main() {
   vDry = curlV.a;
 
   p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
-  
-  offset = modXZ(
-    minRange,
-    maxRange,
-    offset
-  );
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));

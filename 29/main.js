@@ -122,6 +122,9 @@ function generateDistortFn() {
 
 let curlPass;
 
+function mod(a, n) {
+  return ((a % n) + n) % n;
+}
 function orthogonal(v) {
   if (Math.abs(v.x) > Math.abs(v.z)) {
     return new Vector3(-v.y, v.x, 0).normalize();
@@ -180,7 +183,8 @@ function distributeGrass() {
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
   const width = nextPowerOfTwo(Math.sqrt(numPoints));
-  const height = Math.ceil(numPoints / width);
+  const height = width; // Math.ceil(numPoints / width);
+  console.log('got width height', width, height);
 
   const distort = generateDistortFn();
 
@@ -273,27 +277,81 @@ function distributeGrass() {
       ang,
     };
   };
+  function quaternionAdd(a, b) {
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+    a.w += b.w;
+    return a;
+  }
+  function quaternionMultiplyScalar(a, s) {
+    a.x *= s;
+    a.y *= s;
+    a.z *= s;
+    a.w *= s;
+    return a;
+  }
+  function quaternionDivideScalar(a, s) {
+    a.x /= s;
+    a.y /= s;
+    a.z /= s;
+    a.w /= s;
+    return a;
+  }
+  function distanceToSide(uv) {
+    const d = Math.min(Math.abs(uv.x - 0.5), Math.abs(uv.y - 0.5));
+    return 1. - d*2.;
+  }
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
-      const {
-        baseQuaternion,
-        ang,
-      } = _setDummy(p);
+      const position = new THREE.Vector3(0, 0, 0);
+      const quaternion = new THREE.Quaternion(0, 0, 0, 0);
+      const quaternion2 = new THREE.Quaternion(0, 0, 0, 0);
+      let totalWeight = 0;
+      for (let dy = 0; dy < 1; dy++) {
+        for (let dx = 0; dx < 1; dx++) {
+          const uv = new Vector2(x / width, y / height);
+          const uv2 = uv.clone().add(new THREE.Vector2(0.25, 0.25)).multiplyScalar(0.5).add(new THREE.Vector2(dx*0.5, dy*0.5));
+          const uv2Mod = new THREE.Vector2(mod(uv2.x, 1), mod(uv2.y, 1));
+
+          // console.log('got', uv2.toArray(), uv2Mod.toArray());
+
+          const p = localVector2.set(-size/2 + uv2Mod.x * size, 0, size/2 - uv2Mod.y * size);
+          const {
+            baseQuaternion,
+            ang,
+          } = _setDummy(p);
+
+          const weight = distanceToSide(uv2Mod);
+
+          position.add(dummy.position.multiplyScalar(weight));
+          quaternionAdd(quaternion, quaternionMultiplyScalar(baseQuaternion, weight));
+          quaternion2.x += n.x * weight;
+          quaternion2.y += n.y * weight;
+          quaternion2.z += n.z * weight;
+          quaternion2.w += ang * weight;
+          totalWeight += weight;
+        }
+      }
+
+      position.divideScalar(totalWeight);
+      quaternionDivideScalar(quaternion, totalWeight);
+      quaternionDivideScalar(quaternion2, totalWeight);
 
       // compute the index into the data texture array
       const index = y * width + x;
-      dummy.position.toArray(offsetData2, index * 3);
-      baseQuaternion.toArray(quaternionData, index * 4);
-      n.toArray(quaternionData2, index * 4);
-      quaternionData2[index * 4 + 3] = ang;
+      position.toArray(offsetData2, index * 3);
+      quaternion.toArray(quaternionData, index * 4);
+      quaternion2.toArray(quaternionData2, index * 4);
+      /* n.toArray(quaternionData2, index * 4);
+      quaternionData2[index * 4 + 3] = ang; */
     }
   }
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
     mesh.setColorAt(
       i,
-      new Vector3(i, p.x, p.z)
+      new Vector3(i, p.x + 0.5/width, p.z + 0.5/height)
     );
     p.toArray(curlData, i * 3);
   }
