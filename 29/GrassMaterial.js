@@ -389,7 +389,7 @@ void main() {
   float id = instanceColor.x;
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 curlUv2 = vec2(offset.x, offset.z);
-  vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 5., 0.5);
+  vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 4., 0.5);
   curlV.rgb *= 30.;
   // curlV.rb *= 0.2;
   // curlV.g -= 10.;

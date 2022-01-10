@@ -182,7 +182,7 @@ addUpdate(() => {
 function distributeGrass() {
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
-  const width = 128; // nextPowerOfTwo(Math.sqrt(numPoints));
+  const width = 256; // nextPowerOfTwo(Math.sqrt(numPoints));
   const height = width; // Math.ceil(numPoints / width);
   console.log('got width height', width, height);
 
@@ -211,7 +211,7 @@ function distributeGrass() {
     scene.remove(mesh);
     mesh = null;
   }
-  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.01, 1, 2, 10));
+  const geometry = new InstancedBufferGeometry().copy(new PlaneBufferGeometry(0.01, 1, 2, 3));
   const trans = new Matrix4().makeTranslation(0, -0.5, 0);
   geometry.applyMatrix4(trans);
   const rot = new Matrix4().makeRotationX(-Math.PI / 2);
@@ -493,8 +493,8 @@ function distributeGrass() {
   );
   material.uniforms.curlMap.value = curlPass.texture;
 
-  curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
-  curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
+  // curlPass.shader.uniforms.persistence.value = 1; // randomInRange(1, 1.5);
+  // curlPass.shader.uniforms.speed.value = 1; // randomInRange(1, 2);
 
   /* updateFn = () => {
     controls.
@@ -592,10 +592,10 @@ function render() {
     time += dt;
   }
 
-  if (curlPass && running) {
+  /* if (curlPass && running) {
     curlPass.shader.uniforms.time.value = time / 10;
     curlPass.render();
-  }
+  } */
 
   material.uniforms.boulder.value.copy(boulder.position);
   material.uniforms.time.value = time / 10;
