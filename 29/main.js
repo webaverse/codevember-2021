@@ -116,7 +116,7 @@ function generateDistortFn() {
   const c = randomInRange(-100, 100);
   const radius = 1; // randomInRange(0.5, 1);
   return (p) => {
-    p.multiplyScalar(3 + radius * perlin3(p.x + a, p.y + b, p.z + c));
+    p.multiplyScalar(2 + radius * perlin3(p.x + a, p.y + b, p.z + c));
   };
 }
 

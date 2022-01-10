@@ -269,7 +269,7 @@ void main() {
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));
-  // p.y *= 1.5;
+  // p.y *= 1.2;
   p *= scale;
   
   vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
