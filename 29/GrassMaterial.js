@@ -391,9 +391,10 @@ void main() {
   vec2 curlUv2 = vec2(offset.x, offset.z);
   vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 5., 0.5);
   curlV.rgb *= 30.;
-  curlV.g -= 10.;
+  // curlV.rb *= 0.2;
+  // curlV.g -= 10.;
   curlV.a += 0.5;
-  curlV.a *= 2.;
+  curlV.a *= 1.5;
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
