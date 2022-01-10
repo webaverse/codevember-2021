@@ -256,9 +256,13 @@ function distributeGrass() {
       dummy.position.copy(p);
       dummy.scale.set(1, 1, 0.1);
       t.add(mainOffset);
+      // distort(t);
       calcNormal(t, distort, n);
       n.lerp(up, normalFactor);
       t.copy(p).add(n);
+      // t.x *= 0.5;
+      // t.z *= 0.5;
+      t.y += 0.5;
       dummy.up.set(0, 0, -1);
       dummy.lookAt(t);
       const baseQuaternion = localQuaternion.copy(dummy.quaternion);
