@@ -136,13 +136,14 @@ function calcNormal(p, fn, n) {
   const normal = p.clone().normalize();
   //const dPos = p.clone();
   // fn(dPos);
+  // normal.multiplyScalar(0.5);
 
   const tangent = new Vector3().crossVectors(normal, up);
   // fn(tangent)
   const binormal = new Vector3().crossVectors(normal, tangent);
   // fn(binormal);
 
-  const offset = 0.5;
+  const offset = 1;
   const a = new Vector3().copy(p).add(tangent.clone().multiplyScalar(offset));
   const b = new Vector3().copy(p).add(binormal.clone().multiplyScalar(offset));
 
