@@ -215,7 +215,8 @@ void main() {
 
   float id = float(int(instanceColor.x));
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
-  vec2 curlUv2 = vec2(mod(id, curlTSize.x)/(curlTSize.x), ((id)/curlTSize.x)/(curlTSize.y));
+  vec2 curlUv2 = vec2(mod(id + 0.5, curlTSize.x)/(curlTSize.x), ((id + 0.5)/curlTSize.x)/(curlTSize.y));
+  // curlUv2 += vec2(0.5/curlTSize.x/2., 0.5/curlTSize.y/2.);
   vec4 curlV = texture(curlMap, curlUv2);
 
   vec3 positionV = texture(offsetTexture2, curlUv).rgb;
