@@ -393,7 +393,7 @@ void main() {
   curlV.rgb *= 30.;
   curlV.g -= 10.;
   curlV.a += 0.5;
-  curlV.a *= 1.5;
+  curlV.a *= 2.;
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
