@@ -421,11 +421,11 @@ void main() {
 
   vDry = curlV.a;
 
+  p = rotateVectorAxisAngle(p, vec3(0, 0., 1.), PI/2. + atan(direction.z, direction.x));
 
   p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
 
   // vec3 instanceDirection = direction; // applyVectorQuaternion(direction, quaternionV);
-  p = rotateVectorAxisAngle(p, vec3(0, 1., 0), PI/2. + atan(direction.z, direction.x));
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));

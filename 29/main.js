@@ -182,7 +182,7 @@ addUpdate(() => {
 function distributeGrass() {
   // const width = Math.ceil(Math.sqrt(points.length));
   // const height = Math.ceil(points.length / width);
-  const width = 256; // nextPowerOfTwo(Math.sqrt(numPoints));
+  const width = 512; // nextPowerOfTwo(Math.sqrt(numPoints));
   const height = width; // Math.ceil(numPoints / width);
   console.log('got width height', width, height);
 
