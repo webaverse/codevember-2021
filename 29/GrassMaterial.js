@@ -307,7 +307,10 @@ vec2 uvWarp(vec2 uv, int dx, int dy) {
 }
 // this function takes a uv coordinate in [0, 1] and returns the distance to the closest side of the square
 float distanceToSide(vec2 uv) {
-  float d = min(abs(uv.x - 0.5), abs(uv.y - 0.5));
+  /* float d = length(uv - 0.5);
+  return 1. - d/sqrt(0.5*0.5 + 0.5*0.5); */
+
+  float d = max(abs(uv.x - 0.5), abs(uv.y - 0.5));
   return 1. - d*2.;
 }
 vec4 fourTap4(sampler2D tex, vec2 uv) {
@@ -386,7 +389,7 @@ void main() {
   float id = instanceColor.x;
   vec2 curlTSize = vec2(textureSize(curlMap, 0));
   vec2 curlUv2 = vec2(offset.x, offset.z);
-  vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 7., 0.5);
+  vec4 curlV = colorNoise(curlUv2 * 400. + id * 0.0002, 1., 5., 0.5);
   curlV.rgb *= 30.;
   curlV.g -= 10.;
   curlV.a += 0.5;

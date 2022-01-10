@@ -299,8 +299,8 @@ function distributeGrass() {
     return a;
   }
   function distanceToSide(uv) {
-    const d = Math.min(Math.abs(uv.x - 0.5), Math.abs(uv.y - 0.5));
-    return 1. - d*2.;
+    const d = uv.clone().sub(new THREE.Vector2(0.5, 0.5)).length();
+    return 1. - d/Math.sqrt(0.5*0.5 + 0.5*0.5);
   }
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
