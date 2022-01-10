@@ -241,7 +241,7 @@ function distributeGrass() {
   const localQuaternion = new Quaternion();
 
   const rotation = 0.3; // randomInRange(0, 1);
-  const normalFactor = 0;
+  const normalFactor = 0.3;
 
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
