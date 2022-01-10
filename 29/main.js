@@ -243,6 +243,9 @@ function distributeGrass() {
   const localVector3 = new Vector3();
   const localVector4 = new Vector3();
   const localQuaternion = new Quaternion();
+  const localQuaternion2 = new Quaternion();
+
+  const flipQuaternion = new Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI*0.5);
 
   const rotation = 0.3; // randomInRange(0, 1);
   const normalFactor = 0;
@@ -256,7 +259,7 @@ function distributeGrass() {
       
     t.copy(p);
     dummy.position.copy(p);
-    dummy.scale.set(1, 1, 0.1);
+    // dummy.scale.set(1, 1, 0.1);
     t.add(mainOffset);
     // distort(t);
     calcNormal(t, distort, n);
@@ -265,6 +268,7 @@ function distributeGrass() {
     // t.x *= 0.5;
     // t.z *= 0.5;
     t.y += 0.5;
+    const target = t.clone().sub(dummy.position);
     dummy.up.set(0, 0, -1);
     dummy.lookAt(t);
     const baseQuaternion = localQuaternion.copy(dummy.quaternion);
@@ -273,6 +277,7 @@ function distributeGrass() {
     dummy.position.sub(mainP);
 
     return {
+      target,
       baseQuaternion,
       ang,
     };
@@ -300,17 +305,19 @@ function distributeGrass() {
   }
   function distanceToSide(uv) {
     const d = uv.clone().sub(new THREE.Vector2(0.5, 0.5)).length();
-    return 1. - d/Math.sqrt(0.5*0.5 + 0.5*0.5);
+    return 1. - d*2;
   }
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
+      const uv = new Vector2(x / width, y / height);
       const position = new THREE.Vector3(0, 0, 0);
-      const quaternion = new THREE.Quaternion(0, 0, 0, 0);
+      const quaternion = new THREE.Quaternion();
+      const quaternions = [];
       const quaternion2 = new THREE.Quaternion(0, 0, 0, 0);
+      const targets = [];
       let totalWeight = 0;
-      for (let dy = 0; dy < 1; dy++) {
-        for (let dx = 0; dx < 1; dx++) {
-          const uv = new Vector2(x / width, y / height);
+      for (let dy = 0; dy <= 1; dy++) {
+        for (let dx = 0; dx <= 1; dx++) {
           const uv2 = uv.clone().add(new THREE.Vector2(0.25, 0.25)).multiplyScalar(0.5).add(new THREE.Vector2(dx*0.5, dy*0.5));
           const uv2Mod = new THREE.Vector2(mod(uv2.x, 1), mod(uv2.y, 1));
 
@@ -320,12 +327,21 @@ function distributeGrass() {
           const {
             baseQuaternion,
             ang,
+            target,
           } = _setDummy(p);
 
           const weight = distanceToSide(uv2Mod);
 
           position.add(dummy.position.multiplyScalar(weight));
-          quaternionAdd(quaternion, quaternionMultiplyScalar(baseQuaternion, weight));
+          {
+            const q = baseQuaternion.clone();
+            q.weight = weight;
+            quaternions.push(q);
+          }
+          {
+            target.weight = weight;
+            targets.push(target);
+          }
           quaternion2.x += n.x * weight;
           quaternion2.y += n.y * weight;
           quaternion2.z += n.z * weight;
@@ -335,7 +351,35 @@ function distributeGrass() {
       }
 
       position.divideScalar(totalWeight);
-      quaternionDivideScalar(quaternion, totalWeight);
+      {
+        // const identityQuaternion = new THREE.Quaternion();
+        /* quaternions.sort((a, b) => {
+          const va = new Vector3(0, 0, 1)
+            .applyQuaternion(quaternion);
+          const vb = new Vector3(0, 0, 1)
+            .applyQuaternion(quaternion);
+          return vb.y - va.y;
+          // return b.weight - a.weight;
+        }); */
+        // quaternions.reverse();
+
+        const targetVector = new Vector3(0, 0, 0);
+        for (const target of targets) {
+          targetVector.add(target.clone().multiplyScalar(target.weight));
+        }
+        targetVector.divideScalar(totalWeight);
+
+        const p0 = new Vector3(-size/2 + uv.x * size, 0, size/2 - uv.y * size);
+        dummy.position.copy(p0);
+        // dummy.scale.set(1, 1, 0.1);
+        dummy.up.set(0, 0, -1);
+        targetVector.add(dummy.position);
+        dummy.lookAt(targetVector);
+
+        quaternion.copy(dummy.quaternion);
+
+        // console.log('got ', p0.toArray(), targetVector.toArray(), dummy.quaternion.toArray());
+      }
       quaternionDivideScalar(quaternion2, totalWeight);
 
       // compute the index into the data texture array
@@ -561,9 +605,9 @@ function render() {
   material.uniforms.direction.value.set(0, 0, -1)
     // .add(camera.up)
     .normalize()
-    .applyQuaternion(camera.quaternion);
-  material.uniforms.direction.value.y = 0;
-  material.uniforms.direction.value.normalize();
+    .applyQuaternion(camera.quaternion)
+  // material.uniforms.direction.value.y = 0;
+  // material.uniforms.direction.value.normalize();
   if (material.uniforms.direction.value.length() < 0.01) {
     material.uniforms.direction.value.copy(camera.up)
       .applyQuaternion(camera.quaternion);

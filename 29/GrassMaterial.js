@@ -39,7 +39,7 @@ uniform sampler2D curlMap;
 uniform vec3 boulder;
 uniform float size;
 
-out vec3 vNormal;
+// out vec3 vNormal;
 out vec2 vUv;
 out float vDry;
 out float vLight;
@@ -394,7 +394,7 @@ void main() {
   // curlV.rb *= 0.2;
   // curlV.g -= 10.;
   curlV.a += 0.5;
-  curlV.a *= 1.5;
+  curlV.a *= 1.25;
 
   // base position
   vUv = vec2(uv.x, 1.-uv.y);
@@ -412,17 +412,20 @@ void main() {
   float l = length(dBoulder) > 0. ? (length(dBoulder)/cover) : 0.;
   vec3 pNormal = (transpose(inverse(modelMatrix)) * vec4(normalize(vec3(.01 * n.xy, 1.)), 1.)).xyz;
   vec3 target = normalize(position + pNormal) * h;
-  vNormal = normalMatrix * normal;
+  // vNormal = normalMatrix * normal;
   vec3 p = position;
   float f = inCubic(position.z);
   p = mix(p, target, f);
-  p = rotateVectorAxisAngle(p, vec3(0, 0, 1.), PI/2.+ atan(direction.z, direction.x));
   // p = mix(p, p - dBoulder * l, f);
   // p *= length(dBoulder);
 
   vDry = curlV.a;
 
+
   p = (instanceMatrix2 * vec4(p, 1.0)).xyz;
+
+  // vec3 instanceDirection = direction; // applyVectorQuaternion(direction, quaternionV);
+  p = rotateVectorAxisAngle(p, vec3(0, 1., 0), PI/2. + atan(direction.z, direction.x));
   
   p += offset;
   // p.y *= 2. / length(vec3(position.x, 0., position.z));
