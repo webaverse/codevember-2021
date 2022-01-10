@@ -375,8 +375,8 @@ function distributeGrass() {
       undefined,
       RepeatWrapping,
       RepeatWrapping,
-      LinearFilter,
-      LinearFilter
+      NearestFilter,
+      NearestFilter
     ),
     width,
     height
