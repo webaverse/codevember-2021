@@ -246,29 +246,40 @@ function distributeGrass() {
   const mainOffset = localVector.set((Math.random() * 2 - 1), 0, (Math.random() * 2 - 1))
     .normalize()
     .multiplyScalar(Math.sqrt(2 * size / 2));
+  const _setDummy = (p) => {
+    // p.multiplyScalar(0.5);
+    const mainP = localVector3.copy(p);
+      
+    t.copy(p);
+    dummy.position.copy(p);
+    dummy.scale.set(1, 1, 0.1);
+    t.add(mainOffset);
+    // distort(t);
+    calcNormal(t, distort, n);
+    n.lerp(up, normalFactor);
+    t.copy(p).add(n);
+    // t.x *= 0.5;
+    // t.z *= 0.5;
+    t.y += 0.5;
+    dummy.up.set(0, 0, -1);
+    dummy.lookAt(t);
+    const baseQuaternion = localQuaternion.copy(dummy.quaternion);
+    const ang = randomInRange(-rotation, rotation);
+    dummy.rotateOnAxis(n, ang);
+    dummy.position.sub(mainP);
+
+    return {
+      baseQuaternion,
+      ang,
+    };
+  };
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const p = localVector2.set(-size/2 + x * size / width, 0, size/2 - y * size / height);
-      // p.multiplyScalar(0.5);
-      const mainP = localVector3.copy(p);
-      
-      t.copy(p);
-      dummy.position.copy(p);
-      dummy.scale.set(1, 1, 0.1);
-      t.add(mainOffset);
-      // distort(t);
-      calcNormal(t, distort, n);
-      n.lerp(up, normalFactor);
-      t.copy(p).add(n);
-      // t.x *= 0.5;
-      // t.z *= 0.5;
-      t.y += 0.5;
-      dummy.up.set(0, 0, -1);
-      dummy.lookAt(t);
-      const baseQuaternion = localQuaternion.copy(dummy.quaternion);
-      const ang = randomInRange(-rotation, rotation);
-      dummy.rotateOnAxis(n, ang);
-      dummy.position.sub(mainP);
+      const {
+        baseQuaternion,
+        ang,
+      } = _setDummy(p);
 
       // compute the index into the data texture array
       const index = y * width + x;
@@ -276,9 +287,6 @@ function distributeGrass() {
       baseQuaternion.toArray(quaternionData, index * 4);
       n.toArray(quaternionData2, index * 4);
       quaternionData2[index * 4 + 3] = ang;
-      
-      // mainP.multiplyScalar(2);
-      // mainP.toArray(curlData, index * 3);
     }
   }
   for (let i = 0; i < points.length; i++) {

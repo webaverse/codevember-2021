@@ -372,10 +372,10 @@ void main() {
   // curlUv2 += vec2(0.5/curlTSize.x/2., 0.5/curlTSize.y/2.);
   // vec4 curlV = texture(curlMap, curlUv2);
   // vec4 curlV = fourTap4(curlMap, curlUv2);
-  vec4 curlV = colorNoise(curlUv * 2000., 1., 5., 1.);
+  vec4 curlV = colorNoise(curlUv * 2000., 1., 5., 0.5);
   // curlV.g = abs(curlV.g);
   // curlV.g = -1.;
-  curlV.rgb *= 20.;
+  curlV.rgb *= 25.;
   curlV.g -= 10.;
   curlV.a += 0.5;
   curlV.a *= 1.5;
